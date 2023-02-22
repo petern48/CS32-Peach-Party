@@ -16,8 +16,12 @@ public:
 	virtual void doSomething() = 0;
 	//virtual ~Actor();
 
+	void setDead() { m_isAlive = false; }
+	bool isAlive() { return m_isAlive; }
+
 private:
 	bool m_impactable;
+	bool m_isAlive = true;
 };
 
 // PlayerAvatar
@@ -25,12 +29,19 @@ class PlayerAvatar : public Actor {
 public:
 	PlayerAvatar(int imageID, int startX, int startY)
 		:Actor(imageID, startX, startY) { } // Default depth of 0, default startDirection of right
-	bool setState(int state) { m_state = state; }
+	void setState(int state) { m_state = state; }
 	bool getState() const { return m_state; }
+	void setStars(int stars) { m_stars = stars; }
+	int getStars() const { return m_stars; }
+	void setCoins(int coins) { m_coins = coins; }
+	int getCoins() const { return m_coins; }
+
 	virtual void doSomething();
 
 private:
 	int m_state = WAITINGTOROLL; // Waiting to Roll or Walking
+	int m_stars = 0;
+	int m_coins = 0;
 };
 
 class Yoshi : public PlayerAvatar {
@@ -62,12 +73,10 @@ class CoinSquare : public Square {
 public:
 	CoinSquare(int imageID, int X, int Y, bool hasPlayer = false)
 		:Square(imageID, X, Y, hasPlayer) { }
-	void setStatus(bool status) { m_isActive = status; }
-	bool isActive() { return m_isActive; }
 	virtual void doSomething();
 	//virtual int changeCoins() = 0;
 private:
-	bool m_isActive = true; // May be disabled by bowser
+	// May be disabled by bowser
 };
 
 class BlueCoinSquare : public CoinSquare {

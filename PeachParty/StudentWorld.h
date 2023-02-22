@@ -20,6 +20,8 @@ public:
   virtual ~StudentWorld();
 
 private:
+	PlayerAvatar* getWinner();
+
 	Board m_board;
 	std::list<Actor*> m_actors;
 	Yoshi* m_Yoshi = nullptr;

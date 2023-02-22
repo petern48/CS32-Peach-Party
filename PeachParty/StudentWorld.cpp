@@ -14,6 +14,8 @@ GameWorld* createStudentWorld(string assetPath)
 StudentWorld::StudentWorld(string assetPath)
 : GameWorld(assetPath)
 {
+    // Initialize data members
+
 }
 
 int StudentWorld::init()
@@ -47,7 +49,7 @@ int StudentWorld::init()
                     break;
                 case Board::player:
                     m_Peach = new Peach(x, y);
-                    m_Yoshi = new Yoshi(x, y);
+                    // m_Yoshi = new Yoshi(x, y);
                     a = new BlueCoinSquare(x, y); // Players start on a BlueCoinSquare
                     m_actors.push_back(a);
                     break;
@@ -84,15 +86,57 @@ int StudentWorld::init()
 // GameWorld repeatedly calls this roughly 20 times per second. move() represents a single tick
 int StudentWorld::move()
 {
+    // If game over
+    if (timeRemaining() <= 0) {
+        playSound(SOUND_GAME_FINISHED);
+
+        PlayerAvatar* winner = getWinner();
+
+        // Call setFinalScore
+        setFinalScore(winner->getStars(), winner->getCoins());
+
+        // if Peach won
+        return GWSTATUS_PEACH_WON;
+        // else if Yoshi won
+        // else randomly choose one to return
+    }
+    else {
+
+        // Ask all active actors to doSomething
+        m_Peach->doSomething();
+        // m_Yoshi->doSomething();
+        list<Actor*>::iterator it;
+        for (it = m_actors.begin(); it != m_actors.end(); it++) {
+            // If active TODO NOWW
+            (*it)->doSomething();
+        }
+
+        // Delete any actors that have become inactive/dead during this tick
+        for (it = m_actors.begin(); it != m_actors.end(); it++) {
+            if (!(*it)->isAlive()) {
+                delete* it;
+                (*it) = nullptr;
+            }
+        }
+
+        // Update the status text on top of the screen
+
+        setGameStatText("TODO");
+
+
+
+        // If game not over return
+	    return GWSTATUS_CONTINUE_GAME;
+    }
+
+
+    // DELETE
     // This code is here merely to allow the game to build, run, and terminate after you hit ESC.
     // Notice that the return value GWSTATUS_NOT_IMPLEMENTED will cause our framework to end the game.
-
     setGameStatText("Game will end in a few seconds");
     
     if (timeRemaining() <= 0)
 		return GWSTATUS_NOT_IMPLEMENTED;
-    
-	return GWSTATUS_CONTINUE_GAME;
 }
 
 void StudentWorld::cleanUp()
@@ -114,4 +158,11 @@ StudentWorld::~StudentWorld()
         if (ptr != nullptr)
             delete ptr;
     }
+}
+
+
+PlayerAvatar* StudentWorld::getWinner() {
+
+    // TODO
+    return m_Peach;
 }
