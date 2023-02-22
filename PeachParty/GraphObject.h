@@ -11,7 +11,7 @@ const int ANIMATION_POSITIONS_PER_TICK = 1;
 
 class GraphObject
 {
-  public:
+public:
 
 	static const int left = 180;
 	static const int right = 0;
@@ -19,9 +19,9 @@ class GraphObject
 	static const int down = 270;
 
 	GraphObject(int imageID, int startX, int startY, int dir = right, int depth = 0, double size = 1.0)
-	 : m_imageID(imageID), m_visible(true), m_x(startX), m_y(startY),
-	   m_destX(startX), m_destY(startY), m_brightness(1.0),
-	   m_animationNumber(0), m_direction(dir), m_depth(depth), m_size(size)
+		: m_imageID(imageID), m_visible(true), m_x(startX), m_y(startY),
+		m_destX(startX), m_destY(startY), m_brightness(1.0),
+		m_animationNumber(0), m_direction(dir), m_depth(depth), m_size(size)
 	{
 		if (m_size <= 0)
 			m_size = 1;
@@ -37,13 +37,13 @@ class GraphObject
 
 	int getX() const
 	{
-		  // If already moved but not yet animated, use new location anyway.
+		// If already moved but not yet animated, use new location anyway.
 		return m_destX;
 	}
 
 	int getY() const
 	{
-		  // If already moved but not yet animated, use new location anyway.
+		// If already moved but not yet animated, use new location anyway.
 		return m_destY;
 	}
 
@@ -68,14 +68,17 @@ class GraphObject
 
 	void getPositionInThisDirection(int angle, int distance, int& newX, int& newY) const
 	{
-		  // computes new position only if angle is left, right, up, or down
+		// computes new position only if angle is left, right, up, or down
+
+		newX = getX();
+		newY = getY();
 
 		switch (angle)
 		{
-			case left:  newX = getX() - distance; break;
-			case right: newX = getX() + distance; break;
-			case up:    newY = getY() + distance; break;
-			case down:  newY = getY() - distance; break;
+		case left:  newX -= distance; break;
+		case right: newX += distance; break;
+		case up:    newY += distance; break;
+		case down:  newY -= distance; break;
 		}
 
 		// General version for arbitrary angles:
@@ -92,7 +95,7 @@ class GraphObject
 		moveTo(newX, newY);
 	}
 
-	  // The following should be used by only the framework, not the student
+	// The following should be used by only the framework, not the student
 
 	void moveForward(int distance)
 	{
@@ -170,8 +173,8 @@ private:
 		return m_imageID;
 	}
 
-  private:
-	  // Prevent copying or assigning GraphObjects
+private:
+	// Prevent copying or assigning GraphObjects
 	GraphObject(const GraphObject&);
 	GraphObject& operator=(const GraphObject&);
 
