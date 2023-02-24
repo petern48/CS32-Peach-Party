@@ -10,6 +10,8 @@ class StudentWorld;
 const int WAITINGTOROLL = 0; // Make class constants???
 const int WALKING = 1;
 const bool IMPACTABLE = true;
+const bool GRANTCOINS = true;
+const bool DEDUCTCOINS = false;
 
 class Actor : public GraphObject {
 public:
@@ -40,6 +42,8 @@ public:
 	void setCoins(int coins) { m_coins = coins; }
 	int getCoins() const { return m_coins; }
 	int getPlayerNum() const { return m_playerNum; }
+	int getWalkDirection() const { return m_walkDirection; }
+	void setWalkDirection(int walkDirection) { m_walkDirection = walkDirection; }
 
 	int getRoll() { return 1; }; // TODO
 	void fireProjectile();
@@ -50,6 +54,7 @@ private:
 	int m_state = WAITINGTOROLL; // Waiting to Roll or Walking
 	int m_stars = 0;
 	int m_coins = 0;
+	int m_walkDirection = right; // Starting Walking direction is right
 	int ticks_to_move = 0;
 	bool hasVortex = false;
 	int m_playerNum;
@@ -82,18 +87,18 @@ private:
 
 class CoinSquare : public Square {
 public:
-	CoinSquare(int imageID, StudentWorld *sw, int X, int Y, bool hasPlayer = false)
-		:Square(imageID, sw, X, Y, hasPlayer) { }
+	CoinSquare(int imageID, StudentWorld *sw, int X, int Y, bool AddSubtract, bool hasPlayer = false)
+		:Square(imageID, sw, X, Y, hasPlayer), m_AddOrSubtract() { }
 	virtual void doSomething();
 	//virtual int changeCoins() = 0;
 private:
-	// May be disabled by bowser
+	bool m_AddOrSubtract;
 };
 
 class BlueCoinSquare : public CoinSquare {
 public:
 	BlueCoinSquare(int X, int Y, StudentWorld *sw)
-		:CoinSquare(IID_BLUE_COIN_SQUARE, sw, X, Y) { }
+		:CoinSquare(IID_BLUE_COIN_SQUARE, sw, X, Y, GRANTCOINS) { }
 };
 
 // Baddies

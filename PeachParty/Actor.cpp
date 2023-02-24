@@ -36,9 +36,36 @@ void PlayerAvatar::doSomething() {
 		// If avatar can't continue moving forward
 		int newX, newY;
 		getPositionInThisDirection(getDirection(), 1, newX, newY);
-		if (getStudentWorld()->isValidSquare(newX, newY)) {
-			; // CONT
+		if (!getStudentWorld()->isValidSquare(newX, newY)) {
+
+			// Default to sprite direction right (will change if left)
+			setDirection(right);
+
+			// Prefer moving up or right
+			if (getStudentWorld()->isValidSquare(newX, newY + 1)) { // up
+				setWalkDirection(up);
+			}
+			else if (getStudentWorld()->isValidSquare(newX + 1, newY)) { // right
+				setWalkDirection(right);
+			}
+			else if (getStudentWorld()->isValidSquare(newX, newY - 1)) { // down
+				setWalkDirection(down);
+			}
+			// Update Sprite direction if avatar moving left
+			else if (getStudentWorld()->isValidSquare(newX - 1, newY)) { // left
+				setDirection(left);
+			}
 		}
+
+		// Move two pixels in the walk direction
+		moveForward(2);  // UNSUREEE WHAT NUMBER  TODO NOW
+
+		// Decrement ticks to move by 1
+		ticks_to_move--;
+
+		// If done moving, change to waiting to roll state
+		if (ticks_to_move == 0)
+			m_state = WAITINGTOROLL;
 	}
 
 	//if the player presses the left arrow key :
