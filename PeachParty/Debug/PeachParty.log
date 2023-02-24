@@ -1,2 +1,9 @@
-﻿  StudentWorld.cpp
-  PeachParty.vcxproj -> C:\CS32\CS-32-Peach-Party\Debug\PeachParty.exe
+﻿  Actor.cpp
+C:\CS32\CS-32-Peach-Party\PeachParty\Actor.cpp(42,2): error C2059: syntax error: '}'
+C:\CS32\CS-32-Peach-Party\PeachParty\Actor.cpp(55,1): error C2059: syntax error: '}'
+C:\CS32\CS-32-Peach-Party\PeachParty\Actor.cpp(40,4): error C2062: type 'int' unexpected
+C:\CS32\CS-32-Peach-Party\PeachParty\Actor.cpp(55,1): error C2143: syntax error: missing ';' before '}'
+C:\CS32\CS-32-Peach-Party\PeachParty\Actor.cpp(58,1): error C2143: syntax error: missing ';' before '{'
+C:\CS32\CS-32-Peach-Party\PeachParty\Actor.cpp(58,1): error C2447: '{': missing function header (old-style formal list?)
+  StudentWorld.cpp
+  Generating Code...

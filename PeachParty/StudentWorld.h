@@ -18,6 +18,8 @@ public:
   virtual int move();
   virtual void cleanUp();
   virtual ~StudentWorld();
+  int getBankMoney() { return m_bankMoney; }
+  bool isValidSquare(int x, int y);
 
 private:
 	PlayerAvatar* getWinner();
@@ -26,6 +28,7 @@ private:
 	std::list<Actor*> m_actors;
 	Yoshi* m_Yoshi = nullptr;
 	Peach* m_Peach = nullptr;
+	int m_bankMoney = 0;
 };
 
 #endif // STUDENTWORLD_H_
