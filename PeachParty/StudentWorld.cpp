@@ -39,7 +39,7 @@ int StudentWorld::init()
         return GWSTATUS_BOARD_ERROR;
     }
 
-    // if (result == Board::load_success)
+    // if result == load_success
     else {
         cerr << "Successfully loaded board" << endl;
 
@@ -53,13 +53,13 @@ int StudentWorld::init()
                 case Board::empty:
                     break;
                 case Board::player:
-                    m_Peach = new Peach(x, y, this);
+                    m_Peach = new Peach(x * SPRITE_WIDTH, y * SPRITE_HEIGHT, this);
                     // m_Yoshi = new Yoshi(x, y);
-                    a = new BlueCoinSquare(x, y, this); // Players start on a BlueCoinSquare
+                    a = new BlueCoinSquare(x * SPRITE_WIDTH, y * SPRITE_HEIGHT, this); // Players start on a BlueCoinSquare
                     m_actors.push_back(a);
                     break;
                 case Board::blue_coin_square:
-                    a = new BlueCoinSquare(x, y, this); // Players start on a BlueCoinSquare
+                    a = new BlueCoinSquare(x * SPRITE_WIDTH, y * SPRITE_HEIGHT, this); // Players start on a BlueCoinSquare
                     m_actors.push_back(a);
                     break;
                 case Board::red_coin_square:
@@ -145,8 +145,6 @@ int StudentWorld::move()
 }
 
 
-// USE getAction()  somewhere  
-
 void StudentWorld::cleanUp()
 {
     if (m_Peach != nullptr)
@@ -171,12 +169,15 @@ StudentWorld::~StudentWorld()
 
 PlayerAvatar* StudentWorld::getWinner() {
 
-    // TODO
+    // TODO Part 2
     return m_Peach;
 }
 
 bool StudentWorld::isValidSquare(int x, int y) {
-    if (m_board.getContentsOf(x, y) == Board::empty)
+    // Convert back to 16x16 Board coordinates
+    int boardX = x / SPRITE_WIDTH;
+    int boardY = y / SPRITE_HEIGHT;
+    if (m_board.getContentsOf(boardX, boardY) == Board::empty)
         return false;
     return true;
 }

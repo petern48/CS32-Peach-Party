@@ -8,57 +8,66 @@
 // Player Avatar
 void PlayerAvatar::doSomething() {
 
-	// if Avatar has an invalid direction
 
 	if (m_state == WAITINGTOROLL) {
-		int action = getStudentWorld()->getAction(getPlayerNum());
+		// if Avatar has an invalid direction TODO Part 2
 
+
+		int action = getStudentWorld()->getAction(getPlayerNum());
 		if (action == ACTION_ROLL) {
 			int die_roll = randInt(1, 10);
+			setRoll(die_roll);
 
 			ticks_to_move = die_roll * 8;
 
 			m_state = WALKING;
 		}
+		// else if (action == ACTION_FIRE)
 
+		// User didn't press a key or any other key
+		else {
+			return;
+		}
 	}
-	// else if (action == ACTION_FIRE)
 
-	// User didn't press a key or any other key
-	else {
-		return;
-	}
 
 	if (m_state == WALKING) {
 
 		// TODO Part 2
+		// If Avatar directly on top of directional square
+
+		// else if Avatar is directly on top of a square at a fork
 
 		// If avatar can't continue moving forward
 		int newX, newY;
-		getPositionInThisDirection(getDirection(), 1, newX, newY);
+		getPositionInThisDirection(getWalkDirection(), SPRITE_WIDTH, newX, newY);
 		if (!getStudentWorld()->isValidSquare(newX, newY)) {
 
 			// Default to sprite direction right (will change if left)
 			setDirection(right);
 
 			// Prefer moving up or right
-			if (getStudentWorld()->isValidSquare(newX, newY + 1)) { // up
-				setWalkDirection(up);
+
+			// Turn towards valid perpendicular direction
+			if (getWalkDirection() == right || getWalkDirection() == left) {
+				if (getStudentWorld()->isValidSquare(getX(), getY() + SPRITE_HEIGHT)) // up
+					setWalkDirection(up);
+				else if (getStudentWorld()->isValidSquare(getX(), getY() - SPRITE_HEIGHT)) // down
+					setWalkDirection(down);
 			}
-			else if (getStudentWorld()->isValidSquare(newX + 1, newY)) { // right
-				setWalkDirection(right);
-			}
-			else if (getStudentWorld()->isValidSquare(newX, newY - 1)) { // down
-				setWalkDirection(down);
-			}
-			// Update Sprite direction if avatar moving left
-			else if (getStudentWorld()->isValidSquare(newX - 1, newY)) { // left
-				setDirection(left);
+
+			else if (getWalkDirection() == up || getWalkDirection() == down) {
+				if (getStudentWorld()->isValidSquare(getX() + SPRITE_WIDTH, getY())) // right
+					setWalkDirection(right);
+				else if (getStudentWorld()->isValidSquare(getX() - SPRITE_WIDTH, getY())) { // left
+					setWalkDirection(left);
+					setDirection(left); // set Sprite direction left
+				}
 			}
 		}
 
-		// Move two pixels in the walk direction
-		moveForward(2);  // UNSUREEE WHAT NUMBER  TODO NOW
+		// Move two pixels in the walk direction  (2 pixels per tick
+		moveAtAngle(getWalkDirection(), 2);
 
 		// Decrement ticks to move by 1
 		ticks_to_move--;
@@ -83,6 +92,7 @@ void PlayerAvatar::doSomething() {
 
 
 void CoinSquare::doSomething() {
-
+	if (!isAlive())
+		return;
 }
 

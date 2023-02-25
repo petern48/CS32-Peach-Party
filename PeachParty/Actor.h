@@ -44,8 +44,8 @@ public:
 	int getPlayerNum() const { return m_playerNum; }
 	int getWalkDirection() const { return m_walkDirection; }
 	void setWalkDirection(int walkDirection) { m_walkDirection = walkDirection; }
-
-	int getRoll() { return 1; }; // TODO
+	int getRoll() const { return m_dieRoll; }; // TODO
+	void setRoll(int roll) { m_dieRoll = roll; }
 	void fireProjectile();
 
 	virtual void doSomething();
@@ -58,6 +58,7 @@ private:
 	int ticks_to_move = 0;
 	bool hasVortex = false;
 	int m_playerNum;
+	int m_dieRoll = 0;
 };
 
 class Peach : public PlayerAvatar {
@@ -76,10 +77,10 @@ public:
 class Square : public Actor {
 public:
 	Square(int imageID, StudentWorld* sw, int X, int Y, bool hasPlayer = false)
-		:Actor(imageID, sw, X, Y, 1), m_hasPlayer(hasPlayer) { }
+		:Actor(imageID, sw, X, Y, false, 1), m_hasPlayer(hasPlayer) { }
 
 	// virtual void doSomething() = 0;
-	bool getPlayerStatus();
+	bool hasPlayer();
 
 private:
 	bool m_hasPlayer;
