@@ -44,13 +44,16 @@ public:
 	int getPlayerNum() const { return m_playerNum; }
 	int getWalkDirection() const { return m_walkDirection; }
 	void setWalkDirection(int walkDirection) { m_walkDirection = walkDirection; }
-	int getRoll() const { return m_dieRoll; }; // TODO
+	int getRoll() const { return m_dieRoll; };
 	void setRoll(int roll) { m_dieRoll = roll; }
 	void fireProjectile();
 
 	virtual void doSomething();
 
 private:
+
+	void turnPerpendicular();
+
 	int m_state = WAITINGTOROLL; // Waiting to Roll or Walking
 	int m_stars = 0;
 	int m_coins = 0;
@@ -69,7 +72,7 @@ public:
 
 class Yoshi : public PlayerAvatar {
 public:
-	Yoshi::Yoshi(int startX, int startY, StudentWorld *sw)
+	Yoshi(int startX, int startY, StudentWorld *sw)
 		:PlayerAvatar(IID_YOSHI, sw, startX, startY, 2) { }
 };
 
@@ -89,7 +92,7 @@ private:
 class CoinSquare : public Square {
 public:
 	CoinSquare(int imageID, StudentWorld *sw, int X, int Y, bool AddSubtract, bool hasPlayer = false)
-		:Square(imageID, sw, X, Y, hasPlayer), m_AddOrSubtract() { }
+		:Square(imageID, sw, X, Y, hasPlayer), m_AddOrSubtract(AddSubtract) { }
 	virtual void doSomething();
 	//virtual int changeCoins() = 0;
 private:

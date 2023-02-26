@@ -34,38 +34,23 @@ void PlayerAvatar::doSomething() {
 	if (m_state == WALKING) {
 
 		// TODO Part 2
-		// If Avatar directly on top of directional square
+		
 
-		// else if Avatar is directly on top of a square at a fork
+		// Only check if Avatar directly on top of directional square
+		if (getStudentWorld()->isValidSquare(getX(), getY())) {
 
-		// If avatar can't continue moving forward
-		int newX, newY;
-		getPositionInThisDirection(getWalkDirection(), SPRITE_WIDTH, newX, newY);
-		if (!getStudentWorld()->isValidSquare(newX, newY)) {
+			// else if Avatar is directly on top of a square at a fork
 
-			// Default to sprite direction right (will change if left)
-			setDirection(right);
+			int nextX, nextY;
+			getPositionInThisDirection(getWalkDirection(), SPRITE_WIDTH, nextX, nextY);
+			// If avatar can't continue moving forward
+			if (!getStudentWorld()->isValidSquare(nextX, nextY)) {
 
-			// Prefer moving up or right
-
-			// Turn towards valid perpendicular direction
-			if (getWalkDirection() == right || getWalkDirection() == left) {
-				if (getStudentWorld()->isValidSquare(getX(), getY() + SPRITE_HEIGHT)) // up
-					setWalkDirection(up);
-				else if (getStudentWorld()->isValidSquare(getX(), getY() - SPRITE_HEIGHT)) // down
-					setWalkDirection(down);
-			}
-
-			else if (getWalkDirection() == up || getWalkDirection() == down) {
-				if (getStudentWorld()->isValidSquare(getX() + SPRITE_WIDTH, getY())) // right
-					setWalkDirection(right);
-				else if (getStudentWorld()->isValidSquare(getX() - SPRITE_WIDTH, getY())) { // left
-					setWalkDirection(left);
-					setDirection(left); // set Sprite direction left
-				}
+				// Turn towards valid perpendicular direction, prefer moving up or right
+				turnPerpendicular();
 			}
 		}
-
+		
 		// Move two pixels in the walk direction  (2 pixels per tick
 		moveAtAngle(getWalkDirection(), 2);
 
@@ -91,8 +76,32 @@ void PlayerAvatar::doSomething() {
 }
 
 
+
+void PlayerAvatar::turnPerpendicular() {
+	// Default to sprite direction right (will change if left)
+	setDirection(right);
+
+	switch (getWalkDirection()) {
+	case right:
+	case left:
+		if (getStudentWorld()->isValidSquare(getX(), getY() + SPRITE_HEIGHT)) // up
+			setWalkDirection(up);
+		else if (getStudentWorld()->isValidSquare(getX(), getY() - SPRITE_HEIGHT)) // down
+			setWalkDirection(down);
+		break;
+	case up:
+	case down:
+		if (getStudentWorld()->isValidSquare(getX() + SPRITE_WIDTH, getY())) // right
+			setWalkDirection(right);
+		else if (getStudentWorld()->isValidSquare(getX() - SPRITE_WIDTH, getY())) { // left
+			setWalkDirection(left);
+			setDirection(left); // set Sprite direction left
+		}
+	}
+}
+
+
 void CoinSquare::doSomething() {
 	if (!isAlive())
 		return;
 }
-

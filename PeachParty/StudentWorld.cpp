@@ -145,19 +145,26 @@ int StudentWorld::move()
 }
 
 
+// Function may run twice, so set nullptrs
 void StudentWorld::cleanUp()
 {
-    if (m_Peach != nullptr)
+    if (m_Peach != nullptr) {
         delete m_Peach;
-    if (m_Yoshi != nullptr)
+        m_Peach = nullptr;
+    }
+    if (m_Yoshi != nullptr) {
         delete m_Yoshi;
+        m_Yoshi = nullptr;
+    }
 
     // Delete other objects
     list<Actor*>::iterator it;
     for (it = m_actors.begin(); it != m_actors.end(); it++) {
         Actor* ptr = *it;
-        if (ptr != nullptr)
+        if (ptr != nullptr) {
             delete ptr;
+            ptr = nullptr;
+        }
     }
 }
 
@@ -174,8 +181,12 @@ PlayerAvatar* StudentWorld::getWinner() {
 }
 
 bool StudentWorld::isValidSquare(int x, int y) {
+    // If not perfectly on a square
+    if (x % SPRITE_WIDTH != 0 || y % SPRITE_HEIGHT != 0)
+        return false;
+
     // Convert back to 16x16 Board coordinates
-    int boardX = x / SPRITE_WIDTH;
+    int boardX = x / SPRITE_WIDTH; // Rounds down for int division
     int boardY = y / SPRITE_HEIGHT;
     if (m_board.getContentsOf(boardX, boardY) == Board::empty)
         return false;
