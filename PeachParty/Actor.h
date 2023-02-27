@@ -30,6 +30,8 @@ private:
 	bool m_isAlive = true;
 };
 
+class Vortex;
+
 // PlayerAvatar
 class PlayerAvatar : public Actor {
 public:
@@ -44,14 +46,13 @@ public:
 	int getPlayerNum() const { return m_playerNum; }
 	int getWalkDirection() const { return m_walkDirection; }
 	void setWalkDirection(int walkDirection) { m_walkDirection = walkDirection; }
-	int getRoll() const { return m_dieRoll; };
+	int getRoll() const { return m_dieRoll; }
 	void setRoll(int roll) { m_dieRoll = roll; }
-	void fireProjectile();
+	bool hasVortex() { m_hasVortex; }
 
 	virtual void doSomething();
 
 private:
-
 	void turnPerpendicular();
 
 	int m_state = WAITINGTOROLL; // Waiting to Roll or Walking
@@ -59,7 +60,7 @@ private:
 	int m_coins = 0;
 	int m_walkDirection = right; // Starting Walking direction is right
 	int ticks_to_move = 0;
-	bool hasVortex = false;
+	bool m_hasVortex = false;
 	int m_playerNum;
 	int m_dieRoll = 0;
 };
@@ -76,14 +77,24 @@ public:
 		:PlayerAvatar(IID_YOSHI, sw, startX, startY, 2) { }
 };
 
+class Vortex : public Actor {
+public:
+	Vortex(StudentWorld *sw, int x, int y, int direction) 
+		: Actor(IID_VORTEX, sw, x, y), m_firingDirection(direction) { }
+	virtual void doSomething();
+	int getFiringDirection() { return m_firingDirection; }
+private:
+	int m_firingDirection;
+};
+
 // Squares
 class Square : public Actor {
 public:
 	Square(int imageID, StudentWorld* sw, int X, int Y, bool hasPlayer = false)
 		:Actor(imageID, sw, X, Y, false, 1), m_hasPlayer(hasPlayer) { }
 
-	// virtual void doSomething() = 0;
-	bool hasPlayer();
+	bool hasPlayer() { return m_hasPlayer; }
+	void setHasPlayer();
 
 private:
 	bool m_hasPlayer;
@@ -94,17 +105,24 @@ public:
 	CoinSquare(int imageID, StudentWorld *sw, int X, int Y, bool AddSubtract, bool hasPlayer = false)
 		:Square(imageID, sw, X, Y, hasPlayer), m_AddOrSubtract(AddSubtract) { }
 	virtual void doSomething();
-	//virtual int changeCoins() = 0;
+	//virtual int getAddorSubtract() = 0;
 private:
 	bool m_AddOrSubtract;
 };
 
 class BlueCoinSquare : public CoinSquare {
 public:
-	BlueCoinSquare(int X, int Y, StudentWorld *sw)
-		:CoinSquare(IID_BLUE_COIN_SQUARE, sw, X, Y, GRANTCOINS) { }
+	BlueCoinSquare(int x, int y, StudentWorld *sw)
+		:CoinSquare(IID_BLUE_COIN_SQUARE, sw, x, y, GRANTCOINS) { }
 };
 
+class RedCoinSquare :public CoinSquare {
+public:
+	RedCoinSquare(int x, int y, StudentWorld* sw)
+		: CoinSquare(IID_RED_COIN_SQUARE, sw, x, y, DEDUCTCOINS) { }
+};
+
+/*
 // Baddies
 class Baddie : public Actor {
 public:
@@ -114,14 +132,14 @@ public:
 
 class Bowser : public Baddie {
 public:
-	Bowser();
+	Bowser() { };
 };
 
 class Boo : public Baddie {
 public:
-	Boo();
+	Boo() { };
 };
-
+*/
 
 
 #endif // ACTOR_H_

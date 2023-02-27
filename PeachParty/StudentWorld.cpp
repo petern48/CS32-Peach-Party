@@ -16,8 +16,7 @@ GameWorld* createStudentWorld(string assetPath)
 StudentWorld::StudentWorld(string assetPath)
 : GameWorld(assetPath)
 {
-    // Initialize data members
-
+    // Initialize data members (done in .h file)
 }
 
 int StudentWorld::init()
@@ -46,7 +45,7 @@ int StudentWorld::init()
         // Determine where each actor is supposed to be on board, save in single STL container of pointers
         for (int x = 0; x < SPRITE_WIDTH; x++)
             for (int y = 0; y < SPRITE_HEIGHT; y++) {
-                Actor* a;
+                Actor* a = nullptr;
                 //list<Actor*>::iterator it = m_actors.end();
 
                 switch (m_board.getContentsOf(x,y)) {
@@ -54,15 +53,15 @@ int StudentWorld::init()
                     break;
                 case Board::player:
                     m_Peach = new Peach(x * SPRITE_WIDTH, y * SPRITE_HEIGHT, this);
-                    // m_Yoshi = new Yoshi(x, y);
+                    //m_Yoshi = new Yoshi(x * SPRITE_WIDTH, y * SPRITE_HEIGHT, this);
                     a = new BlueCoinSquare(x * SPRITE_WIDTH, y * SPRITE_HEIGHT, this); // Players start on a BlueCoinSquare
-                    m_actors.push_back(a);
                     break;
                 case Board::blue_coin_square:
-                    a = new BlueCoinSquare(x * SPRITE_WIDTH, y * SPRITE_HEIGHT, this); // Players start on a BlueCoinSquare
-                    m_actors.push_back(a);
+                    a = new BlueCoinSquare(x * SPRITE_WIDTH, y * SPRITE_HEIGHT, this);
                     break;
                 case Board::red_coin_square:
+                    //a = new RedCoinSquare(x * SPRITE_WIDTH, y * SPRITE_HEIGHT, this);
+                    break;
                 case Board::up_dir_square:
                 case Board::down_dir_square:
                 case Board::left_dir_square:
@@ -74,6 +73,8 @@ int StudentWorld::init()
                 case Board::boo:
                     break;
                 }
+                if (a != nullptr)
+                    m_actors.push_back(a);
             }
     }
 
@@ -97,7 +98,7 @@ int StudentWorld::move()
 {
     // Ask all active actors to doSomething
     m_Peach->doSomething();
-    // m_Yoshi->doSomething();
+    //m_Yoshi->doSomething();
 
     list<Actor*>::iterator it;
     for (it = m_actors.begin(); it != m_actors.end(); it++) {
