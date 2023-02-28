@@ -30,11 +30,28 @@ private:
 	bool m_isAlive = true;
 };
 
+// Moveable character
+class Character : public Actor {
+public:
+	Character(int imageID, StudentWorld* sw, int startX, int startY)
+		:Actor(imageID, sw, startX, startY) { }
+	int getWalkDirection() const { return m_walkDirection; }
+	void setWalkDirection(int walkDirection) { m_walkDirection = walkDirection; }
+
+protected:
+	int getTicksToMove() const { return m_ticks_to_move; }
+	void setTicksToMove(int ticks) { m_ticks_to_move = ticks; }
+	void turnPerpendicular();
+private:
+	int m_walkDirection = right; // Starting Walking direction is right
+	int m_ticks_to_move = 0;
+};
+
 // PlayerAvatar
-class PlayerAvatar : public Actor {
+class PlayerAvatar : public Character {
 public:
 	PlayerAvatar(int imageID, StudentWorld *sw, int startX, int startY, int playerNum) 
-		:Actor(imageID, sw, startX, startY), m_playerNum(playerNum) { } // Default depth of 0, default startDirection of right
+		:Character(imageID, sw, startX, startY), m_playerNum(playerNum) { } // Default depth of 0, default startDirection of right
 	void setState(int state) { m_state = state; }
 	bool getState() const { return m_state; }
 	void setStars(int stars) { m_stars = stars; }
@@ -42,8 +59,7 @@ public:
 	void setCoins(int coins) { m_coins = coins; }
 	int getCoins() const { return m_coins; }
 	int getPlayerNum() const { return m_playerNum; }
-	int getWalkDirection() const { return m_walkDirection; }
-	void setWalkDirection(int walkDirection) { m_walkDirection = walkDirection; }
+
 	int getRoll() const { return m_dieRoll; }
 	void setRoll(int roll) { m_dieRoll = roll; }
 	bool hasVortex() { return m_hasVortex; }
@@ -51,13 +67,9 @@ public:
 	virtual void doSomething();
 
 private:
-	void turnPerpendicular();
-
 	int m_state = WAITINGTOROLL; // Waiting to Roll or Walking
 	int m_stars = 0;
 	int m_coins = 0;
-	int m_walkDirection = right; // Starting Walking direction is right
-	int ticks_to_move = 0;
 	bool m_hasVortex = false;
 	int m_playerNum;
 	int m_dieRoll = 0;
@@ -120,13 +132,19 @@ public:
 		: CoinSquare(IID_RED_COIN_SQUARE, sw, x, y, DEDUCTCOINS) { }
 };
 
-/*
+
+
 // Baddies
 class Baddie : public Actor {
 public:
-	// Baddie(int imageID, int startX, int startY)
+	Baddie(int imageID, StudentWorld* sw, int startX, int startY)
+		:Actor(imageID, sw, startX, startY, true){ }
+	
 	// impactable
+private:
+
 };
+/*
 
 class Bowser : public Baddie {
 public:
@@ -139,5 +157,7 @@ public:
 };
 */
 
+
+void vortexOverlapsWithABaddie();
 
 #endif // ACTOR_H_

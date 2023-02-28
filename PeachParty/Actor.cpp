@@ -34,7 +34,7 @@ void PlayerAvatar::doSomething() {
 			int die_roll = randInt(1, 10);
 			setRoll(die_roll);
 
-			ticks_to_move = die_roll * 8;
+			setTicksToMove(die_roll * 8);
 
 			m_state = WALKING;
 		}
@@ -77,17 +77,17 @@ void PlayerAvatar::doSomething() {
 		moveAtAngle(getWalkDirection(), 2);
 
 		// Decrement ticks to move by 1
-		ticks_to_move--;
+		setTicksToMove(getTicksToMove() - 1);
 
 		// If done moving, change to waiting to roll state
-		if (ticks_to_move == 0)
+		if (getTicksToMove() == 0)
 			m_state = WAITINGTOROLL;
 	}
 }
 
 
 
-void PlayerAvatar::turnPerpendicular() {
+void Character::turnPerpendicular() {
 	// Default to sprite direction right (will change if left)
 	setDirection(right);
 
