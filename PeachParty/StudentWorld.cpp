@@ -52,15 +52,15 @@ int StudentWorld::init()
                 case Board::empty:
                     break;
                 case Board::player:
-                    m_Peach = new Peach(x * SPRITE_WIDTH, y * SPRITE_HEIGHT, this);
-                    m_Yoshi = new Yoshi(x * SPRITE_WIDTH, y * SPRITE_HEIGHT, this);
-                    a = new BlueCoinSquare(x * SPRITE_WIDTH, y * SPRITE_HEIGHT, this); // Players start on a BlueCoinSquare
+                    m_Peach = new Peach(x, y, this);
+                    m_Yoshi = new Yoshi(x, y, this);
+                    a = new BlueCoinSquare(x, y, this); // Players start on a BlueCoinSquare
                     break;
                 case Board::blue_coin_square:
-                    a = new BlueCoinSquare(x * SPRITE_WIDTH, y * SPRITE_HEIGHT, this);
+                    a = new BlueCoinSquare(x, y, this);
                     break;
                 case Board::red_coin_square:
-                    a = new RedCoinSquare(x * SPRITE_WIDTH, y * SPRITE_HEIGHT, this);
+                    a = new RedCoinSquare(x, y, this);
                     break;
                 case Board::up_dir_square:
                 case Board::down_dir_square:
@@ -70,7 +70,10 @@ int StudentWorld::init()
                 case Board::bank_square:
                 case Board::star_square:
                 case Board::bowser:
+                    a = new Bowser(x * SPRITE_WIDTH, y * SPRITE_HEIGHT, this);
+                    break;
                 case Board::boo:
+                    a = new Boo(x * SPRITE_WIDTH, y * SPRITE_HEIGHT, this);
                     break;
                 }
                 if (a != nullptr)
@@ -140,9 +143,19 @@ int StudentWorld::move()
 }
 
 
+void deleteActor(Actor* a) {
+    if (a != nullptr) {
+        delete a;
+        a = nullptr;
+    }
+}
+
 // Function may run twice, so set nullptrs
 void StudentWorld::cleanUp()
 {
+    deleteActor(m_Peach);
+    deleteActor(m_Yoshi);
+    /*
     if (m_Peach != nullptr) {
         delete m_Peach;
         m_Peach = nullptr;
@@ -151,15 +164,19 @@ void StudentWorld::cleanUp()
         delete m_Yoshi;
         m_Yoshi = nullptr;
     }
+    */
 
     // Delete other objects
     list<Actor*>::iterator it;
     for (it = m_actors.begin(); it != m_actors.end(); it++) {
         Actor* ptr = *it;
+        deleteActor(ptr);
+        /*
         if (ptr != nullptr) {
             delete ptr;
             ptr = nullptr;
         }
+        */
     }
 }
 

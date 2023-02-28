@@ -9,7 +9,7 @@
 void PlayerAvatar::doSomething() {
 
 	int nextX, nextY;
-	if (m_state == WAITINGTOROLL) {
+	if (getState() == WAITING) {
 		// Maybe add part where only check if on square exactly (like below)
 
 		// if Avatar has an invalid direction (due to being teleported)
@@ -23,10 +23,7 @@ void PlayerAvatar::doSomething() {
 			} while (getStudentWorld()->isValidSquare(nextX, nextY));
 
 			// Set new Sprite Direction
-			if (newDirection == left)
-				setDirection(left);
-			else
-				setDirection(right);
+			setSpriteDirection(newDirection);
 		}
 		
 		int action = getStudentWorld()->getAction(getPlayerNum());
@@ -36,7 +33,7 @@ void PlayerAvatar::doSomething() {
 
 			setTicksToMove(die_roll * 8);
 
-			m_state = WALKING;
+			setState(WALKING);
 		}
 		if (action == ACTION_FIRE) {
 			// TODO
@@ -54,7 +51,7 @@ void PlayerAvatar::doSomething() {
 	}
 
 
-	if (m_state == WALKING) {
+	if (getState() == WALKING) {
 
 		// TODO Part 2
 
@@ -81,16 +78,13 @@ void PlayerAvatar::doSomething() {
 
 		// If done moving, change to waiting to roll state
 		if (getTicksToMove() == 0)
-			m_state = WAITINGTOROLL;
+			setState(WAITING);
 	}
 }
 
 
 
 void Character::turnPerpendicular() {
-	// Default to sprite direction right (will change if left)
-	setDirection(right);
-
 	switch (getWalkDirection()) {
 	case right:
 	case left:
@@ -105,9 +99,9 @@ void Character::turnPerpendicular() {
 			setWalkDirection(right);
 		else if (getStudentWorld()->isValidSquare(getX() - SPRITE_WIDTH, getY())) { // left
 			setWalkDirection(left);
-			setDirection(left); // set Sprite direction left
 		}
 	}
+	setSpriteDirection(getWalkDirection()); // set Sprite direction based on walk direction
 }
 
 
@@ -131,6 +125,17 @@ void Vortex::doSomething() {
 void CoinSquare::doSomething() {
 	if (!isAlive())
 		return;
+}
 
+void Bowser::doSomething()
+{
+	/*
+	if (getState() == WAITING) { // PAUSED
+		
+	}
+	*/
+}
+
+void Boo::doSomething() {
 	
 }

@@ -7,8 +7,8 @@ class StudentWorld;
 
 // Students:  Add code to this file, Actor.cpp, StudentWorld.h, and StudentWorld.cpp
 
-const int WAITINGTOROLL = 0; // Make class constants???
-const int WALKING = 1;
+const bool WAITING = false; // Make class constants???
+const bool WALKING = true;
 const bool IMPACTABLE = true;
 const bool GRANTCOINS = true;
 const bool DEDUCTCOINS = false;
@@ -16,7 +16,8 @@ const bool DEDUCTCOINS = false;
 class Actor : public GraphObject {
 public:
 	Actor(int imageID, StudentWorld* sw, int startX, int startY, bool impactable = false, int depth = 0, int startDir = right)
-		:GraphObject(imageID, startX, startY, startDir, depth), m_impactable(impactable), m_studentWorld(sw) { }
+		:GraphObject(imageID, startX * SPRITE_WIDTH, startY * SPRITE_HEIGHT, startDir, depth),
+		m_impactable(impactable), m_studentWorld(sw) { }
 	virtual void doSomething() = 0;
 	//virtual ~Actor();
 
@@ -33,16 +34,21 @@ private:
 // Moveable character
 class Character : public Actor {
 public:
-	Character(int imageID, StudentWorld* sw, int startX, int startY)
-		:Actor(imageID, sw, startX, startY) { }
+	Character(int imageID, StudentWorld* sw, int startX, int startY, bool impactable = false)
+		:Actor(imageID, sw, startX, startY, impactable) { }
 	int getWalkDirection() const { return m_walkDirection; }
 	void setWalkDirection(int walkDirection) { m_walkDirection = walkDirection; }
+
+	void setState(int state) { m_state = state; }
+	bool getState() const { return m_state; }
 
 protected:
 	int getTicksToMove() const { return m_ticks_to_move; }
 	void setTicksToMove(int ticks) { m_ticks_to_move = ticks; }
 	void turnPerpendicular();
+	void setSpriteDirection(int dir) { dir == left ? setDirection(left) : setDirection(right); }
 private:
+	bool m_state = WAITING; // Waiting to Roll or Paused for Baddies
 	int m_walkDirection = right; // Starting Walking direction is right
 	int m_ticks_to_move = 0;
 };
@@ -52,8 +58,7 @@ class PlayerAvatar : public Character {
 public:
 	PlayerAvatar(int imageID, StudentWorld *sw, int startX, int startY, int playerNum) 
 		:Character(imageID, sw, startX, startY), m_playerNum(playerNum) { } // Default depth of 0, default startDirection of right
-	void setState(int state) { m_state = state; }
-	bool getState() const { return m_state; }
+
 	void setStars(int stars) { m_stars = stars; }
 	int getStars() const { return m_stars; }
 	void setCoins(int coins) { m_coins = coins; }
@@ -67,7 +72,6 @@ public:
 	virtual void doSomething();
 
 private:
-	int m_state = WAITINGTOROLL; // Waiting to Roll or Walking
 	int m_stars = 0;
 	int m_coins = 0;
 	bool m_hasVortex = false;
@@ -135,27 +139,28 @@ public:
 
 
 // Baddies
-class Baddie : public Actor {
+class Baddie : public Character {
 public:
 	Baddie(int imageID, StudentWorld* sw, int startX, int startY)
-		:Actor(imageID, sw, startX, startY, true){ }
-	
-	// impactable
-private:
+		:Character(imageID, sw, startX, startY, IMPACTABLE){ }
 
+private:
+	int m_pauseCounter = 180;
 };
-/*
 
 class Bowser : public Baddie {
 public:
-	Bowser() { };
+	Bowser(int startX, int startY, StudentWorld* sw)
+	: Baddie(IID_BOWSER, sw, startX, startY) { }
+	virtual void doSomething();
 };
 
 class Boo : public Baddie {
 public:
-	Boo() { };
+	Boo(int startX, int startY, StudentWorld* sw)
+		: Baddie(IID_BOO, sw, startX, startY) { }
+	virtual void doSomething();
 };
-*/
 
 
 void vortexOverlapsWithABaddie();
