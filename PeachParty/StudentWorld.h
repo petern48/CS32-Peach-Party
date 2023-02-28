@@ -20,10 +20,12 @@ public:
   virtual ~StudentWorld();
   int getBankMoney() { return m_bankMoney; }
   bool isValidSquare(int x, int y);
+  Actor* searchForSquare(int x, int y);
 
 private:
 	PlayerAvatar* getWinner();
 	std::string getStatsString();
+	void deleteActor(Actor* a);
 
 	Board m_board;
 	std::list<Actor*> m_actors;

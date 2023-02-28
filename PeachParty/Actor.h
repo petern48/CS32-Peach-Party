@@ -10,8 +10,8 @@ class StudentWorld;
 const bool WAITING = false; // Make class constants???
 const bool WALKING = true;
 const bool IMPACTABLE = true;
-const bool GRANTCOINS = true;
-const bool DEDUCTCOINS = false;
+const int GRANTCOINS = 3;
+const int DEDUCTCOINS = -3;
 
 class Actor : public GraphObject {
 public:
@@ -24,6 +24,7 @@ public:
 	void setDead() { m_isAlive = false; }
 	bool isAlive() { return m_isAlive; }
 	StudentWorld* getStudentWorld() { return m_studentWorld; }
+	virtual bool isSquare() { return false; }
 
 private:
 	StudentWorld* m_studentWorld;
@@ -47,7 +48,11 @@ protected:
 	void setTicksToMove(int ticks) { m_ticks_to_move = ticks; }
 	void turnPerpendicular();
 	void setSpriteDirection(int dir) { dir == left ? setDirection(left) : setDirection(right); }
+	Actor* landOnSquare();
+	void getLegalmoves(int moves[]);
+
 private:
+	
 	bool m_state = WAITING; // Waiting to Roll or Paused for Baddies
 	int m_walkDirection = right; // Starting Walking direction is right
 	int m_ticks_to_move = 0;
@@ -101,27 +106,33 @@ private:
 	int m_firingDirection;
 };
 
-// Squares
+
+
+
+// SQUARES
 class Square : public Actor {
 public:
-	Square(int imageID, StudentWorld* sw, int X, int Y, bool hasPlayer = false)
-		:Actor(imageID, sw, X, Y, false, 1), m_hasPlayer(hasPlayer) { }
+	Square(int imageID, StudentWorld* sw, int X, int Y)
+		:Actor(imageID, sw, X, Y, false, 1) { }
 
-	bool hasPlayer() { return m_hasPlayer; }
-	void setHasPlayer();
+	//bool hasPlayer() { return m_hasPlayer; }
+	//void setHasPlayer();
+	virtual Character* hasNewPlayer(Character* c, bool landed) { return c; }
+	virtual bool isSquare() { return true; }
 
 private:
-	bool m_hasPlayer;
+	Character* m_onSquare = nullptr;
 };
 
 class CoinSquare : public Square {
 public:
-	CoinSquare(int imageID, StudentWorld *sw, int X, int Y, bool AddSubtract, bool hasPlayer = false)
-		:Square(imageID, sw, X, Y, hasPlayer), m_AddOrSubtract(AddSubtract) { }
+	CoinSquare(int imageID, StudentWorld *sw, int X, int Y, bool type)
+		:Square(imageID, sw, X, Y), m_type(type) { }
 	virtual void doSomething();
-	//virtual int getAddorSubtract() = 0;
+	void updateCoins(PlayerAvatar* p);
+
 private:
-	bool m_AddOrSubtract;
+	int m_type;
 };
 
 class BlueCoinSquare : public CoinSquare {
@@ -130,19 +141,28 @@ public:
 		:CoinSquare(IID_BLUE_COIN_SQUARE, sw, x, y, GRANTCOINS) { }
 };
 
-class RedCoinSquare :public CoinSquare {
+class RedCoinSquare : public CoinSquare {
 public:
 	RedCoinSquare(int x, int y, StudentWorld* sw)
 		: CoinSquare(IID_RED_COIN_SQUARE, sw, x, y, DEDUCTCOINS) { }
 };
 
+class StarSquare : public Square {
+public:
+	StarSquare(int x, int y, StudentWorld* sw)
+		: Square(IID_STAR_SQUARE, sw, x, y) { }
+	virtual void doSomething();
+};
 
 
-// Baddies
+
+// BADDIES
 class Baddie : public Character {
 public:
 	Baddie(int imageID, StudentWorld* sw, int startX, int startY)
 		:Character(imageID, sw, startX, startY, IMPACTABLE){ }
+
+	void impactBaddie();
 
 private:
 	int m_pauseCounter = 180;

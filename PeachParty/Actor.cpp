@@ -55,7 +55,7 @@ void PlayerAvatar::doSomething() {
 
 		// TODO Part 2
 
-		// Only check if Avatar directly on top of directional square
+		// Only check if Avatar directly on top of a square
 		if (getStudentWorld()->isValidSquare(getX(), getY())) {
 
 			// else if Avatar is directly on top of a square at a fork
@@ -104,6 +104,11 @@ void Character::turnPerpendicular() {
 	setSpriteDirection(getWalkDirection()); // set Sprite direction based on walk direction
 }
 
+Actor* Character::landOnSquare() {
+	// Search for square Actor is on
+	return getStudentWorld()->searchForSquare(getX(), getY());
+}
+
 
 void Vortex::doSomething() {
 	if (!isAlive())
@@ -122,13 +127,30 @@ void Vortex::doSomething() {
 }
 
 
+// SQUARES
+
 void CoinSquare::doSomething() {
 	if (!isAlive())
 		return;
 }
 
-void Bowser::doSomething()
-{
+void CoinSquare::updateCoins(PlayerAvatar* p) {
+	if (m_type == GRANTCOINS) {
+		p->setCoins(p->getCoins() + GRANTCOINS);
+		getStudentWorld()->playSound(SOUND_GIVE_COIN);
+	}
+	else {
+		p->setCoins(p->getCoins() + DEDUCTCOINS);
+		getStudentWorld()->playSound(SOUND_TAKE_COIN);
+	}
+}
+
+void StarSquare::doSomething() {
+	// if (m_Peach->get)
+}
+
+
+void Bowser::doSomething() {
 	/*
 	if (getState() == WAITING) { // PAUSED
 		

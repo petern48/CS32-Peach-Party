@@ -142,41 +142,17 @@ int StudentWorld::move()
     return GWSTATUS_CONTINUE_GAME;
 }
 
-
-void deleteActor(Actor* a) {
-    if (a != nullptr) {
-        delete a;
-        a = nullptr;
-    }
-}
-
 // Function may run twice, so set nullptrs
 void StudentWorld::cleanUp()
 {
     deleteActor(m_Peach);
     deleteActor(m_Yoshi);
-    /*
-    if (m_Peach != nullptr) {
-        delete m_Peach;
-        m_Peach = nullptr;
-    }
-    if (m_Yoshi != nullptr) {
-        delete m_Yoshi;
-        m_Yoshi = nullptr;
-    }
-    */
 
     // Delete other objects
     list<Actor*>::iterator it;
     for (it = m_actors.begin(); it != m_actors.end(); it++) {
         Actor* ptr = *it;
         deleteActor(ptr);
-        /*
-        if (ptr != nullptr) {
-            delete ptr;
-            ptr = nullptr;
-        }
-        */
     }
 }
 
@@ -188,6 +164,13 @@ StudentWorld::~StudentWorld()
 
 
 // HELPER FUNCTIONS
+
+void StudentWorld::deleteActor(Actor* a) {
+    if (a != nullptr) {
+        delete a;
+        a = nullptr;
+    }
+}
 
 PlayerAvatar* StudentWorld::getWinner() {
     // Peach has more stars
@@ -238,4 +221,14 @@ string StudentWorld::getStatsString() {
         oss << " VOR";
 
     return oss.str();
+}
+
+Actor* StudentWorld::searchForSquare(int x, int y) {
+    list<Actor*>::iterator it;
+    for (it = m_actors.begin(); it != m_actors.end(); it++) {
+        if ((*it)->isSquare() && (*it)->getX() == x && (*it)->getY() == y) {
+            return (*it);
+        }
+    }
+    return nullptr;
 }
