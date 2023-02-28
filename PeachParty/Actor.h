@@ -30,8 +30,6 @@ private:
 	bool m_isAlive = true;
 };
 
-class Vortex;
-
 // PlayerAvatar
 class PlayerAvatar : public Actor {
 public:
@@ -48,7 +46,7 @@ public:
 	void setWalkDirection(int walkDirection) { m_walkDirection = walkDirection; }
 	int getRoll() const { return m_dieRoll; }
 	void setRoll(int roll) { m_dieRoll = roll; }
-	bool hasVortex() { m_hasVortex; }
+	bool hasVortex() { return m_hasVortex; }
 
 	virtual void doSomething();
 

@@ -23,6 +23,7 @@ public:
 
 private:
 	PlayerAvatar* getWinner();
+	std::string getStatsString();
 
 	Board m_board;
 	std::list<Actor*> m_actors;

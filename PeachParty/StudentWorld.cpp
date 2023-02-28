@@ -53,14 +53,14 @@ int StudentWorld::init()
                     break;
                 case Board::player:
                     m_Peach = new Peach(x * SPRITE_WIDTH, y * SPRITE_HEIGHT, this);
-                    //m_Yoshi = new Yoshi(x * SPRITE_WIDTH, y * SPRITE_HEIGHT, this);
+                    m_Yoshi = new Yoshi(x * SPRITE_WIDTH, y * SPRITE_HEIGHT, this);
                     a = new BlueCoinSquare(x * SPRITE_WIDTH, y * SPRITE_HEIGHT, this); // Players start on a BlueCoinSquare
                     break;
                 case Board::blue_coin_square:
                     a = new BlueCoinSquare(x * SPRITE_WIDTH, y * SPRITE_HEIGHT, this);
                     break;
                 case Board::red_coin_square:
-                    //a = new RedCoinSquare(x * SPRITE_WIDTH, y * SPRITE_HEIGHT, this);
+                    a = new RedCoinSquare(x * SPRITE_WIDTH, y * SPRITE_HEIGHT, this);
                     break;
                 case Board::up_dir_square:
                 case Board::down_dir_square:
@@ -96,9 +96,26 @@ int StudentWorld::init()
 // GameWorld repeatedly calls this roughly 20 times per second. move() represents a single tick
 int StudentWorld::move()
 {
+    // If game over
+    if (timeRemaining() <= 0) {
+        playSound(SOUND_GAME_FINISHED);
+
+        // Chooses random if tie
+        PlayerAvatar* winner = getWinner();
+
+        // Call setFinalScore
+        setFinalScore(winner->getStars(), winner->getCoins());
+
+        // if Peach won
+        if (winner == m_Peach)
+            return GWSTATUS_PEACH_WON;
+        else
+            return GWSTATUS_YOSHI_WON;
+    }
+
     // Ask all active actors to doSomething
     m_Peach->doSomething();
-    //m_Yoshi->doSomething();
+    m_Yoshi->doSomething();
 
     list<Actor*>::iterator it;
     for (it = m_actors.begin(); it != m_actors.end(); it++) {
@@ -115,34 +132,11 @@ int StudentWorld::move()
     }
 
     // Update the status text on top of the screen
-    ostringstream oss;
-    oss << "P1 Roll: " << m_Peach->getRoll() << " Stars: " << m_Peach->getStars() << " $$: " << m_Peach->getCoins();
-    oss << " | Time: " << timeRemaining() << " | " << "Bank: " << getBankMoney() << " | ";
-    // oss << "P2 Roll: " << m_Yoshi->getRoll() << " Stars: " << m_Yoshi->getStars() << " $$: " << m_Yoshi->getCoins();
-    
-    // if vor, oss << "VOR";
-    string gameStats = oss.str();
+    string gameStats = getStatsString();
     setGameStatText(gameStats);
 
-
-    // If game over
-    if (timeRemaining() <= 0) {
-        playSound(SOUND_GAME_FINISHED);
-
-        PlayerAvatar* winner = getWinner();
-
-        // Call setFinalScore
-        setFinalScore(winner->getStars(), winner->getCoins());
-
-        // if Peach won
-        return GWSTATUS_PEACH_WON;
-        // else if Yoshi won
-        // 
-        // else randomly choose one to return
-    }
-
     // If game not over return
-	return GWSTATUS_CONTINUE_GAME;
+    return GWSTATUS_CONTINUE_GAME;
 }
 
 
@@ -175,10 +169,32 @@ StudentWorld::~StudentWorld()
     cleanUp();
 }
 
-PlayerAvatar* StudentWorld::getWinner() {
 
-    // TODO Part 2
-    return m_Peach;
+// HELPER FUNCTIONS
+
+PlayerAvatar* StudentWorld::getWinner() {
+    // Peach has more stars
+    if (m_Peach->getStars() > m_Yoshi->getStars())
+        return m_Peach;
+    // Yoshi has more stars
+    else if (m_Yoshi->getStars() > m_Peach->getStars())
+        return m_Yoshi;
+    // Same number of stars
+    else {
+        // Peach has more coins
+        if (m_Peach->getCoins() > m_Yoshi->getCoins())
+            return m_Peach;
+        // Yoshi has more coins
+        else if (m_Yoshi->getCoins() > m_Peach->getCoins())
+            return m_Yoshi;
+        // Choose randomly
+        else {
+            if (randInt(1, 2) == 1)
+                return m_Peach;
+            else 
+                return m_Yoshi;
+        }
+    }
 }
 
 bool StudentWorld::isValidSquare(int x, int y) {
@@ -192,4 +208,17 @@ bool StudentWorld::isValidSquare(int x, int y) {
     if (m_board.getContentsOf(boardX, boardY) == Board::empty)
         return false;
     return true;
+}
+
+string StudentWorld::getStatsString() {
+    ostringstream oss;
+    oss << "P1 Roll: " << m_Peach->getRoll() << " Stars: " << m_Peach->getStars() << " $$: " << m_Peach->getCoins();
+    if (m_Peach->hasVortex())
+        oss << " VOR";
+    oss << " | Time: " << timeRemaining() << " | " << "Bank: " << getBankMoney() << " | ";
+    oss << "P2 Roll: " << m_Yoshi->getRoll() << " Stars: " << m_Yoshi->getStars() << " $$: " << m_Yoshi->getCoins();
+    if (m_Yoshi->hasVortex())
+        oss << " VOR";
+
+    return oss.str();
 }
