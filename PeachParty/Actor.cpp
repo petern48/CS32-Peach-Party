@@ -81,7 +81,6 @@ void Player::doSomething() {
 }
 
 
-
 void Character::turnPerpendicular() {
 	switch (getWalkDirection()) {
 	case right:
@@ -105,8 +104,9 @@ void Character::turnPerpendicular() {
 void Player::activate() {
 	// Search for square Actor is on
 	Activatable* square = getStudentWorld()->getSquareAt(getX(), getY());
+
 	if (square != nullptr)
-		square->activateNextTick();
+		square->activateNextTick(this);
 
 	//return getStudentWorld()->getSquareAt(getX(), getY());
 }
@@ -138,6 +138,10 @@ void Vortex::doSomething() {
 void CoinSquare::doSomething() {
 	if (!isAlive())
 		return;
+	Player* p = getPlayerToActivateOn();
+	if (p != nullptr) {
+		updateCoins(p);
+	}
 }
 
 void CoinSquare::updateCoins(Player* p) {

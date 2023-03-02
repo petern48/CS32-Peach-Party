@@ -109,12 +109,24 @@ public:
 	Activatable(int imageID, StudentWorld* sw, int startX, int startY, bool impactable = false, int depth = 0, int startDir = right)
 		: Actor(imageID, sw, startX, startY, impactable, depth, startDir) { }
 
-
-	void activateNextTick() { m_activateNextTurn = true; }
-	void unactivate() { m_activateNextTurn = false; }
+	void activateNextTick(Actor* a) { m_actorToActivateOn = a; }
+	void unactivate() { m_actorToActivateOn = nullptr; }
+	Actor* getactorToActivateOn() const { return m_actorToActivateOn; }
 
 private:
-	bool m_activateNextTurn = false;
+	Actor* m_actorToActivateOn = nullptr;
+};
+
+class ActivateOnPlayer : public Activatable {
+public:
+	ActivateOnPlayer(int imageID, StudentWorld* sw, int startX, int startY, bool impactable = false, int depth = 0, int startDir = right)
+		: Activatable(imageID, sw, startX, startY, impactable, depth, startDir) { }
+
+	void activateNextTick(Player* p) { m_playerToActivateOn = p; }
+	Player* getPlayerToActivateOn() const { return m_playerToActivateOn; }
+
+private:
+	Player* m_playerToActivateOn = nullptr;
 };
 
 
@@ -134,12 +146,10 @@ private:
 
 
 // SQUARES
-class Square : public Activatable {
+class Square : public ActivateOnPlayer {
 public:
 	Square(int imageID, StudentWorld* sw, int X, int Y)
-		:Activatable(imageID, sw, X, Y, false, 1) { }
-
-	virtual void activate() { }
+		:ActivateOnPlayer(imageID, sw, X, Y, false, 1) { }
 
 	//bool hasPlayer() { return m_hasPlayer; }
 	//void setHasPlayer();
@@ -155,9 +165,8 @@ public:
 	CoinSquare(int imageID, StudentWorld *sw, int X, int Y, bool type)
 		:Square(imageID, sw, X, Y), m_type(type) { }
 	virtual void doSomething();
-	virtual void activate() { }
 
-	void updateCoins(Player* p);
+	void updateCoins(Player *p);
 
 private:
 	int m_type;
@@ -185,10 +194,10 @@ public:
 
 
 // BADDIES
-class Baddie : public Activatable {
+class Baddie : public ActivateOnPlayer {
 public:
 	Baddie(int imageID, StudentWorld* sw, int startX, int startY)
-		: Activatable(imageID, sw, startX, startY, IMPACTABLE){ }
+		: ActivateOnPlayer(imageID, sw, startX, startY, IMPACTABLE){ }
 
 	virtual void activate() { }
 
