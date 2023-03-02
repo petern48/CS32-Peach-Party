@@ -27,7 +27,10 @@ public:
   Activatable* getSquareAt(int x, int y);
   Actor* getRandomSquare();
   
+
   Player* getOtherPlayer(Player* p) const;
+  Player* getPeach() { return m_Peach; }
+  Player* getYoshi() { return m_Yoshi; }
 
 
 private:

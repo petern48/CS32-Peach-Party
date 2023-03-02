@@ -57,9 +57,6 @@ void Player::doSomething() {
 		// If Avatar directly on top of a square
 		if (getStudentWorld()->isValidSquare(getX(), getY())) {
 
-			// Tell actors to activate next tick
-			activate();
-
 			// else if Avatar is directly on top of a square at a fork
 
 			getPositionInThisDirection(getWalkDirection(), SPRITE_WIDTH, nextX, nextY);
@@ -77,6 +74,9 @@ void Player::doSomething() {
 		// Decrement ticks to move by 1
 		setTicksToMove(getTicksToMove() - 1);
 
+		// Tell actors to activate next tick
+		activate();
+
 		// If done moving, change to waiting to roll state
 		if (getTicksToMove() == 0)
 			setState(WAITING);
@@ -84,14 +84,25 @@ void Player::doSomething() {
 }
 
 void Player::activate() {
-	// Search for square Actor is on
-	Activatable* square = getStudentWorld()->getSquareAt(getX(), getY());
 
-	if (square != nullptr)
-		square->setActorToActivateOn(this);
+	// If just stopped moving
+	if (getTicksToMove() == 0) {
+		// Search for square Actor is on
+		Activatable* square = getStudentWorld()->getSquareAt(getX(), getY());
 
-	//return getStudentWorld()->getSquareAt(getX(), getY());
+		if (square != nullptr)
+			square->setActorToActivateOn(this);
+
+	}
 }
+
+/*
+Activatable::doSomething() {
+
+}
+*/
+
+
 
 void Character::turnPerpendicular() {
 	switch (getWalkDirection()) {

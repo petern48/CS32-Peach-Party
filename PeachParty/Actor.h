@@ -22,9 +22,10 @@ public:
 	//virtual ~Actor();
 
 	void setDead() { m_isAlive = false; }
-	bool isAlive() { return m_isAlive; }
-	StudentWorld* getStudentWorld() { return m_studentWorld; }
-	virtual bool isSquare() { return false; }
+	bool isAlive() const { return m_isAlive; }
+	StudentWorld* getStudentWorld() const { return m_studentWorld; }
+	virtual bool isSquare() const { return false; }
+	virtual bool isPlayer() const { return false; }
 	// virtual bool isImpactable() const { return m_impactable; }
 
 private:
@@ -70,6 +71,7 @@ public:
 	void setCoins(int coins) { m_coins = coins; }
 	int getCoins() const { return m_coins; }
 
+	virtual bool isPlayer() const { return true; }
 	virtual void activate(); // Activates squares or baddies it encounters
 
 	int getRoll() const { return m_dieRoll; }
@@ -104,26 +106,35 @@ public:
 };
 
 
+
 class Activatable : public Actor {
 public:
 	Activatable(int imageID, StudentWorld* sw, int startX, int startY, bool impactable = false, int depth = 0, int startDir = right)
 		: Actor(imageID, sw, startX, startY, impactable, depth, startDir) { }
 
+	virtual void doSomething() { } // TODO
+
+	// Overloaded Functions for Actor or Player
 	virtual void setActorToActivateOn(Actor* a) { m_actorToActivateOn = a; }
+	virtual void setActorToActivateOn(Player* p) = 0;
+
+	virtual Actor* getActorToActivateOn() const { return m_actorToActivateOn; }
 	virtual void unactivate() { m_actorToActivateOn = nullptr; }
-	virtual Actor* getactorToActivateOn() const { return m_actorToActivateOn; }
 
 private:
 	Actor* m_actorToActivateOn = nullptr;
 };
 
+
 class ActivateOnPlayer : public Activatable {
 public:
 	ActivateOnPlayer(int imageID, StudentWorld* sw, int startX, int startY, bool impactable = false, int depth = 0, int startDir = right)
-		: Activatable(imageID, sw, startX, startY, impactable, depth, startDir) { }
+		: Activatable (imageID, sw, startX, startY, impactable, depth, startDir) { }
 
-	virtual void setActorToActivateOn(Player* p) { m_playerToActivateOn = p; }
+	//virtual void setActorToActivateOn(Player* p); /* { m_playerToActivateOn = p; }*/
 	virtual Player* getActorToActivateOn() const { return m_playerToActivateOn; }
+	virtual void setActorToActivateOn(Player* p) { m_playerToActivateOn = p; }
+	virtual void unactivate() { m_playerToActivateOn = nullptr; }
 
 private:
 	Player* m_playerToActivateOn = nullptr;
@@ -153,11 +164,10 @@ public:
 
 	//bool hasPlayer() { return m_hasPlayer; }
 	//void setHasPlayer();
-	virtual Character* hasNewPlayer(Character* c, bool landed) { return c; }
+	// virtual Character* hasNewPlayer(Character* c, bool landed) { return c; }
 	virtual bool isSquare() { return true; }
 
 private:
-	Character* m_onSquare = nullptr;
 };
 
 class CoinSquare : public Square {

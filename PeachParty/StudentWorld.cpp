@@ -163,6 +163,13 @@ StudentWorld::~StudentWorld()
 }
 
 
+Player* StudentWorld::getOtherPlayer(Player* p) const {
+    if (p == m_Peach)
+        return m_Yoshi;
+    else
+        return m_Peach;
+}
+
 // HELPER FUNCTIONS
 
 void StudentWorld::deleteActor(Actor* a) {
@@ -225,10 +232,8 @@ string StudentWorld::getStatsString() {
 
 Activatable* StudentWorld::getSquareAt(int x, int y) {
     list<Activatable*>::iterator it;
-    for (it = m_actors.begin(); it != m_actors.end(); it++) {
-        if ((*it)->isSquare() && (*it)->getX() == x && (*it)->getY() == y) {
+    for (it = m_actors.begin(); it != m_actors.end(); it++)
+        if ((*it)->isSquare() && (*it)->getX() == x && (*it)->getY() == y)
             return (*it);
-        }
-    }
     return nullptr;
 }
