@@ -54,8 +54,11 @@ void Player::doSomething() {
 
 		// TODO Part 2
 
-		// Only check if Avatar directly on top of a square
+		// If Avatar directly on top of a square
 		if (getStudentWorld()->isValidSquare(getX(), getY())) {
+
+			// Tell actors to activate next tick
+			activate();
 
 			// else if Avatar is directly on top of a square at a fork
 
@@ -80,6 +83,15 @@ void Player::doSomething() {
 	}
 }
 
+void Player::activate() {
+	// Search for square Actor is on
+	Activatable* square = getStudentWorld()->getSquareAt(getX(), getY());
+
+	if (square != nullptr)
+		square->setActorToActivateOn(this);
+
+	//return getStudentWorld()->getSquareAt(getX(), getY());
+}
 
 void Character::turnPerpendicular() {
 	switch (getWalkDirection()) {
@@ -101,15 +113,6 @@ void Character::turnPerpendicular() {
 	setSpriteDirection(getWalkDirection()); // set Sprite direction based on walk direction
 }
 
-void Player::activate() {
-	// Search for square Actor is on
-	Activatable* square = getStudentWorld()->getSquareAt(getX(), getY());
-
-	if (square != nullptr)
-		square->activateNextTick(this);
-
-	//return getStudentWorld()->getSquareAt(getX(), getY());
-}
 
 void Character::getLegalMoves(int moves[]) {
 
@@ -138,7 +141,7 @@ void Vortex::doSomething() {
 void CoinSquare::doSomething() {
 	if (!isAlive())
 		return;
-	Player* p = getPlayerToActivateOn();
+	Player* p = getActorToActivateOn();
 	if (p != nullptr) {
 		updateCoins(p);
 	}

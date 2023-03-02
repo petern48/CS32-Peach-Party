@@ -109,9 +109,9 @@ public:
 	Activatable(int imageID, StudentWorld* sw, int startX, int startY, bool impactable = false, int depth = 0, int startDir = right)
 		: Actor(imageID, sw, startX, startY, impactable, depth, startDir) { }
 
-	void activateNextTick(Actor* a) { m_actorToActivateOn = a; }
-	void unactivate() { m_actorToActivateOn = nullptr; }
-	Actor* getactorToActivateOn() const { return m_actorToActivateOn; }
+	virtual void setActorToActivateOn(Actor* a) { m_actorToActivateOn = a; }
+	virtual void unactivate() { m_actorToActivateOn = nullptr; }
+	virtual Actor* getactorToActivateOn() const { return m_actorToActivateOn; }
 
 private:
 	Actor* m_actorToActivateOn = nullptr;
@@ -122,8 +122,8 @@ public:
 	ActivateOnPlayer(int imageID, StudentWorld* sw, int startX, int startY, bool impactable = false, int depth = 0, int startDir = right)
 		: Activatable(imageID, sw, startX, startY, impactable, depth, startDir) { }
 
-	void activateNextTick(Player* p) { m_playerToActivateOn = p; }
-	Player* getPlayerToActivateOn() const { return m_playerToActivateOn; }
+	virtual void setActorToActivateOn(Player* p) { m_playerToActivateOn = p; }
+	virtual Player* getActorToActivateOn() const { return m_playerToActivateOn; }
 
 private:
 	Player* m_playerToActivateOn = nullptr;
