@@ -45,7 +45,7 @@ int StudentWorld::init()
         // Determine where each actor is supposed to be on board, save in single STL container of pointers
         for (int x = 0; x < SPRITE_WIDTH; x++)
             for (int y = 0; y < SPRITE_HEIGHT; y++) {
-                Actor* a = nullptr;
+                Activatable* a = nullptr;
                 //list<Actor*>::iterator it = m_actors.end();
 
                 switch (m_board.getContentsOf(x,y)) {
@@ -120,7 +120,7 @@ int StudentWorld::move()
     m_Peach->doSomething();
     m_Yoshi->doSomething();
 
-    list<Actor*>::iterator it;
+    list<Activatable*>::iterator it;
     for (it = m_actors.begin(); it != m_actors.end(); it++) {
         if ((*it)->isAlive())
             (*it)->doSomething();
@@ -149,7 +149,7 @@ void StudentWorld::cleanUp()
     deleteActor(m_Yoshi);
 
     // Delete other objects
-    list<Actor*>::iterator it;
+    list<Activatable*>::iterator it;
     for (it = m_actors.begin(); it != m_actors.end(); it++) {
         Actor* ptr = *it;
         deleteActor(ptr);
@@ -223,8 +223,8 @@ string StudentWorld::getStatsString() {
     return oss.str();
 }
 
-Actor* StudentWorld::getSquareAt(int x, int y) {
-    list<Actor*>::iterator it;
+Activatable* StudentWorld::getSquareAt(int x, int y) {
+    list<Activatable*>::iterator it;
     for (it = m_actors.begin(); it != m_actors.end(); it++) {
         if ((*it)->isSquare() && (*it)->getX() == x && (*it)->getY() == y) {
             return (*it);

@@ -24,7 +24,7 @@ public:
   void resetBankCoins() { m_bankMoney = 0; }
 
   bool isValidSquare(int x, int y);
-  Actor* getSquareAt(int x, int y);
+  Activatable* getSquareAt(int x, int y);
   Actor* getRandomSquare();
   
   Player* getOtherPlayer(Player* p) const;
@@ -36,7 +36,7 @@ private:
 	void deleteActor(Actor* a);
 
 	Board m_board;
-	std::list<Actor*> m_actors;
+	std::list<Activatable*> m_actors;
 	Yoshi* m_Yoshi = nullptr;
 	Peach* m_Peach = nullptr;
 	int m_bankMoney = 0;

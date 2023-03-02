@@ -50,7 +50,6 @@ void Player::doSomething() {
 		}
 	}
 
-
 	if (getState() == WALKING) {
 
 		// TODO Part 2
@@ -59,7 +58,6 @@ void Player::doSomething() {
 		if (getStudentWorld()->isValidSquare(getX(), getY())) {
 
 			// else if Avatar is directly on top of a square at a fork
-
 
 			getPositionInThisDirection(getWalkDirection(), SPRITE_WIDTH, nextX, nextY);
 			// If avatar can't continue moving forward
@@ -106,9 +104,10 @@ void Character::turnPerpendicular() {
 
 void Player::activate() {
 	// Search for square Actor is on
-	// Square* s = getStudentWorld()->getSquareAt(x, y);
+	Activatable* square = getStudentWorld()->getSquareAt(getX(), getY());
+	if (square != nullptr)
+		square->activateNextTick();
 
-	// s->activateOnPlayer();
 	//return getStudentWorld()->getSquareAt(getX(), getY());
 }
 

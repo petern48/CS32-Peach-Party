@@ -19,7 +19,6 @@ public:
 		:GraphObject(imageID, startX * SPRITE_WIDTH, startY * SPRITE_HEIGHT, startDir, depth),
 		m_impactable(impactable), m_studentWorld(sw) { }
 	virtual void doSomething() = 0;
-	virtual void activate() = 0;
 	//virtual ~Actor();
 
 	void setDead() { m_isAlive = false; }
@@ -41,6 +40,7 @@ public:
 		:Actor(imageID, sw, startX, startY, impactable) { }
 	int getWalkDirection() const { return m_walkDirection; }
 	void setWalkDirection(int walkDirection) { m_walkDirection = walkDirection; }
+	virtual void activate() = 0;
 
 	void setState(int state) { m_state = state; }
 	bool getState() const { return m_state; }
@@ -103,10 +103,25 @@ public:
 		:Player(IID_YOSHI, sw, startX, startY, 2) { }
 };
 
-class Vortex : public Actor {
+
+class Activatable : public Actor {
+public:
+	Activatable(int imageID, StudentWorld* sw, int startX, int startY, bool impactable = false, int depth = 0, int startDir = right)
+		: Actor(imageID, sw, startX, startY, impactable, depth, startDir) { }
+
+
+	void activateNextTick() { m_activateNextTurn = true; }
+	void unactivate() { m_activateNextTurn = false; }
+
+private:
+	bool m_activateNextTurn = false;
+};
+
+
+class Vortex : public Activatable {
 public:
 	Vortex(StudentWorld *sw, int x, int y, int direction) 
-		: Actor(IID_VORTEX, sw, x, y), m_firingDirection(direction) { }
+		: Activatable(IID_VORTEX, sw, x, y), m_firingDirection(direction) { }
 	virtual void doSomething();
 	virtual void activate();
 
@@ -119,10 +134,10 @@ private:
 
 
 // SQUARES
-class Square : public Actor {
+class Square : public Activatable {
 public:
 	Square(int imageID, StudentWorld* sw, int X, int Y)
-		:Actor(imageID, sw, X, Y, false, 1) { }
+		:Activatable(imageID, sw, X, Y, false, 1) { }
 
 	virtual void activate() { }
 
@@ -140,6 +155,8 @@ public:
 	CoinSquare(int imageID, StudentWorld *sw, int X, int Y, bool type)
 		:Square(imageID, sw, X, Y), m_type(type) { }
 	virtual void doSomething();
+	virtual void activate() { }
+
 	void updateCoins(Player* p);
 
 private:
@@ -168,10 +185,10 @@ public:
 
 
 // BADDIES
-class Baddie : public Character {
+class Baddie : public Activatable {
 public:
 	Baddie(int imageID, StudentWorld* sw, int startX, int startY)
-		:Character(imageID, sw, startX, startY, IMPACTABLE){ }
+		: Activatable(imageID, sw, startX, startY, IMPACTABLE){ }
 
 	virtual void activate() { }
 
