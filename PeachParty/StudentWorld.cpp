@@ -104,7 +104,7 @@ int StudentWorld::move()
         playSound(SOUND_GAME_FINISHED);
 
         // Chooses random if tie
-        PlayerAvatar* winner = getWinner();
+        Player* winner = getWinner();
 
         // Call setFinalScore
         setFinalScore(winner->getStars(), winner->getCoins());
@@ -172,7 +172,7 @@ void StudentWorld::deleteActor(Actor* a) {
     }
 }
 
-PlayerAvatar* StudentWorld::getWinner() {
+Player* StudentWorld::getWinner() {
     // Peach has more stars
     if (m_Peach->getStars() > m_Yoshi->getStars())
         return m_Peach;
@@ -215,7 +215,7 @@ string StudentWorld::getStatsString() {
     oss << "P1 Roll: " << m_Peach->getRoll() << " Stars: " << m_Peach->getStars() << " $$: " << m_Peach->getCoins();
     if (m_Peach->hasVortex())
         oss << " VOR";
-    oss << " | Time: " << timeRemaining() << " | " << "Bank: " << getBankMoney() << " | ";
+    oss << " | Time: " << timeRemaining() << " | " << "Bank: " << getBankCoins() << " | ";
     oss << "P2 Roll: " << m_Yoshi->getRoll() << " Stars: " << m_Yoshi->getStars() << " $$: " << m_Yoshi->getCoins();
     if (m_Yoshi->hasVortex())
         oss << " VOR";
@@ -223,7 +223,7 @@ string StudentWorld::getStatsString() {
     return oss.str();
 }
 
-Actor* StudentWorld::searchForSquare(int x, int y) {
+Actor* StudentWorld::getSquareAt(int x, int y) {
     list<Actor*>::iterator it;
     for (it = m_actors.begin(); it != m_actors.end(); it++) {
         if ((*it)->isSquare() && (*it)->getX() == x && (*it)->getY() == y) {

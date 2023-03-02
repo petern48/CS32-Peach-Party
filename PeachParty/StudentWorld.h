@@ -18,12 +18,20 @@ public:
   virtual int move();
   virtual void cleanUp();
   virtual ~StudentWorld();
-  int getBankMoney() { return m_bankMoney; }
+
+  int getBankCoins() const { return m_bankMoney; }
+  void depositBankCoins(int c) { m_bankMoney += c; }
+  void resetBankCoins() { m_bankMoney = 0; }
+
   bool isValidSquare(int x, int y);
-  Actor* searchForSquare(int x, int y);
+  Actor* getSquareAt(int x, int y);
+  Actor* getRandomSquare();
+  
+  Player* getOtherPlayer(Player* p) const;
+
 
 private:
-	PlayerAvatar* getWinner();
+	Player* getWinner();
 	std::string getStatsString();
 	void deleteActor(Actor* a);
 

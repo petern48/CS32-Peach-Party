@@ -6,7 +6,7 @@
 // Actor
 
 // Player Avatar
-void PlayerAvatar::doSomething() {
+void Player::doSomething() {
 
 	int nextX, nextY;
 	if (getState() == WAITING) {
@@ -104,9 +104,16 @@ void Character::turnPerpendicular() {
 	setSpriteDirection(getWalkDirection()); // set Sprite direction based on walk direction
 }
 
-Actor* Character::landOnSquare() {
+void Player::activate() {
 	// Search for square Actor is on
-	return getStudentWorld()->searchForSquare(getX(), getY());
+	// Square* s = getStudentWorld()->getSquareAt(x, y);
+
+	// s->activateOnPlayer();
+	//return getStudentWorld()->getSquareAt(getX(), getY());
+}
+
+void Character::getLegalMoves(int moves[]) {
+
 }
 
 
@@ -134,7 +141,7 @@ void CoinSquare::doSomething() {
 		return;
 }
 
-void CoinSquare::updateCoins(PlayerAvatar* p) {
+void CoinSquare::updateCoins(Player* p) {
 	if (m_type == GRANTCOINS) {
 		p->setCoins(p->getCoins() + GRANTCOINS);
 		getStudentWorld()->playSound(SOUND_GIVE_COIN);
