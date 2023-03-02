@@ -12,6 +12,7 @@ const bool WALKING = true;
 const bool IMPACTABLE = true;
 const int GRANTCOINS = 3;
 const int DEDUCTCOINS = -3;
+const int COINSFORASTAR = 20;
 
 class Actor : public GraphObject {
 public:
@@ -66,7 +67,7 @@ public:
 		:Character(imageID, sw, startX, startY), m_playerNum(playerNum) { } // Default depth of 0, default startDirection of right
 
 	int getPlayerNum() const { return m_playerNum; }   // UNSURE!!!
-	void setStars(int stars) { m_stars = stars; }
+	void addStar() { m_stars++; }
 	int getStars() const { return m_stars; }
 	void setCoins(int coins) { m_coins = coins; }
 	int getCoins() const { return m_coins; }

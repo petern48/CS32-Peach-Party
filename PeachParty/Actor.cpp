@@ -175,7 +175,18 @@ void CoinSquare::updateCoins(Player* p) {
 }
 
 void StarSquare::doSomething() {
-	// if (m_Peach->get)
+	if (!isAlive())
+		return;
+
+	Player* p = getActorToActivateOn();
+	// If activated and has enough coins
+	if (p != nullptr && p->getCoins() >= COINSFORASTAR) {
+		// Replace 20 coins per stars
+		p->setCoins(p->getCoins() - COINSFORASTAR);
+		p->addStar();
+		getStudentWorld()->playSound(SOUND_GIVE_STAR);
+	}
+
 }
 
 
