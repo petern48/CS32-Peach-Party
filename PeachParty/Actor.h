@@ -131,7 +131,6 @@ public:
 	ActivateOnPlayer(int imageID, StudentWorld* sw, int startX, int startY, bool impactable = false, int depth = 0, int startDir = right)
 		: Activatable (imageID, sw, startX, startY, impactable, depth, startDir) { }
 
-	//virtual void setActorToActivateOn(Player* p); /* { m_playerToActivateOn = p; }*/
 	virtual Player* getActorToActivateOn() const { return m_playerToActivateOn; }
 	virtual void setActorToActivateOn(Player* p) { m_playerToActivateOn = p; }
 	virtual void unactivate() { m_playerToActivateOn = nullptr; }
@@ -162,17 +161,14 @@ public:
 	Square(int imageID, StudentWorld* sw, int X, int Y)
 		:ActivateOnPlayer(imageID, sw, X, Y, false, 1) { }
 
-	//bool hasPlayer() { return m_hasPlayer; }
-	//void setHasPlayer();
-	// virtual Character* hasNewPlayer(Character* c, bool landed) { return c; }
-	virtual bool isSquare() { return true; }
+	virtual bool isSquare() const { return true; }
 
 private:
 };
 
 class CoinSquare : public Square {
 public:
-	CoinSquare(int imageID, StudentWorld *sw, int X, int Y, bool type)
+	CoinSquare(int imageID, StudentWorld *sw, int X, int Y, int type)
 		:Square(imageID, sw, X, Y), m_type(type) { }
 	virtual void doSomething();
 

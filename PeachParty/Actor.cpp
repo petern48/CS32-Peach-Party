@@ -155,6 +155,7 @@ void CoinSquare::doSomething() {
 	Player* p = getActorToActivateOn();
 	if (p != nullptr) {
 		updateCoins(p);
+		unactivate();
 	}
 }
 
@@ -164,7 +165,11 @@ void CoinSquare::updateCoins(Player* p) {
 		getStudentWorld()->playSound(SOUND_GIVE_COIN);
 	}
 	else {
-		p->setCoins(p->getCoins() + DEDUCTCOINS);
+		int newCount = p->getCoins() + DEDUCTCOINS;
+		if (newCount <= 0)
+			p->setCoins(0);
+		else
+			p->setCoins(newCount);
 		getStudentWorld()->playSound(SOUND_TAKE_COIN);
 	}
 }
