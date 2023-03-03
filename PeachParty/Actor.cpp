@@ -1,5 +1,6 @@
 #include "Actor.h"
 #include "StudentWorld.h"
+using namespace std;
 
 // Students:  Add code to this file, Actor.h, StudentWorld.h, and StudentWorld.cpp
 
@@ -12,19 +13,23 @@ void Player::doSomething() {
 	if (getState() == WAITING) {
 		// Maybe add part where only check if on square exactly (like below)
 
-		// if Avatar has an invalid direction (due to being teleported)
+		// if Avatar has an invalid direction (due to being teleported) TODOOOOOO
+
+		/*
 		getPositionInThisDirection(getWalkDirection(), SPRITE_WIDTH, nextX, nextY);
 		if (!getStudentWorld()->isValidSquare(nextX, nextY)) {
 			int newDirection;
-			do {
-				// Pick random valid direction (facing a valid square)
-				newDirection = randInt(0, 3) * 90; // Returns direction
-				getPositionInThisDirection(newDirection, SPRITE_WIDTH, nextX, nextY);
-			} while (getStudentWorld()->isValidSquare(nextX, nextY));
 
-			// Set new Sprite Direction
-			setSpriteDirection(newDirection);
+			do {
+			vector<int> legalMoves = getLegalMoves();
+			newDirection = randInt(0, legalMoves.size() - 1);
+			} while (newDirection != getWalkDirection() + 180 && newDirection != getWalkDirection() - 180);
+			// Direction shouldn't be going backwards
+
+			// Set new walk direction (and proper Sprite Direction)
+			setWalkDirection(newDirection);
 		}
+		*/
 		
 		int action = getStudentWorld()->getAction(getPlayerNum());
 		if (action == ACTION_ROLL) {
@@ -85,15 +90,19 @@ void Player::doSomething() {
 
 void Player::activate() {
 
-	// If just stopped moving
-	if (getTicksToMove() == 0) {
-		// Search for square Actor is on
-		Activatable* square = getStudentWorld()->getSquareAt(getX(), getY());
+	// Search for square Actor might be on
+	Activatable* square = getStudentWorld()->getSquareAt(getX(), getY());
 
-		if (square != nullptr)
-			square->setActorToActivateOn(this);
+	bool landed = false;
 
-	}
+	// If just stopped moving, landed is true
+	if (getTicksToMove() == 0)
+		landed = true;
+
+	if (square != nullptr)
+		square->setActorToActivateOn(this, landed);
+
+	// Still walking
 }
 
 /*
@@ -102,8 +111,16 @@ Activatable::doSomething() {
 }
 */
 
+// Set Walk Direction and Sprite direction accordingly
+void Character::setWalkDirection(int walkDirection) { 
+	m_walkDirection = walkDirection; 
+	if (walkDirection == left)
+		setDirection(left);
+	else
+		setDirection(right);
+}
 
-
+// Prefer turning to left or right
 void Character::turnPerpendicular() {
 	switch (getWalkDirection()) {
 	case right:
@@ -117,18 +134,24 @@ void Character::turnPerpendicular() {
 	case down:
 		if (getStudentWorld()->isValidSquare(getX() + SPRITE_WIDTH, getY())) // right
 			setWalkDirection(right);
-		else if (getStudentWorld()->isValidSquare(getX() - SPRITE_WIDTH, getY())) { // left
+		else if (getStudentWorld()->isValidSquare(getX() - SPRITE_WIDTH, getY())) // left
 			setWalkDirection(left);
-		}
+		break;
 	}
-	setSpriteDirection(getWalkDirection()); // set Sprite direction based on walk direction
 }
 
-
-void Character::getLegalMoves(int moves[]) {
-
+std::vector<int> Character::getLegalMoves() {
+	vector<int> movesAllowed;
+	int nextX, nextY;
+	int direction = 0;
+	for (int i = 0; i < 4; i++) {
+		getPositionInThisDirection(getWalkDirection(), SPRITE_WIDTH, nextX, nextY);
+		if (getStudentWorld()->isValidSquare(nextX, nextY) && direction)
+			movesAllowed.push_back(direction);
+		direction += 90;
+	}
+	return movesAllowed;
 }
-
 
 void Vortex::doSomething() {
 	if (!isAlive())
@@ -153,7 +176,9 @@ void CoinSquare::doSomething() {
 	if (!isAlive())
 		return;
 	Player* p = getActorToActivateOn();
-	if (p != nullptr) {
+
+	// Player must have landed on square
+	if (p != nullptr && didPlayerLand() == true) {
 		updateCoins(p);
 		unactivate();
 	}
@@ -188,6 +213,18 @@ void StarSquare::doSomething() {
 	}
 
 }
+
+void DirectionSquare::doSomething() {
+	if (!isAlive())
+		return;
+	Player* p = getActorToActivateOn();
+	// If activated by a player
+	if (p != nullptr) {
+		p->setWalkDirection(getDirection());
+	}
+}
+
+
 
 
 void Bowser::doSomething() {

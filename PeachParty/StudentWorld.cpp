@@ -5,6 +5,10 @@
 using namespace std;
 
 const int LENGTHOFGAME = 99;
+const int LEFT = 180;
+const int RIGHT = 0;
+const int UP = 90;
+const int DOWN = 270;
 
 GameWorld* createStudentWorld(string assetPath)
 {
@@ -63,9 +67,17 @@ int StudentWorld::init()
                     a = new RedCoinSquare(x, y, this);
                     break;
                 case Board::up_dir_square:
+                    a = new DirectionSquare(x, y, this, UP);
+                    break;
                 case Board::down_dir_square:
+                    a = new DirectionSquare(x, y, this, DOWN);
+                    break;
                 case Board::left_dir_square:
+                    a = new DirectionSquare(x, y, this, LEFT);
+                    break;
                 case Board::right_dir_square:
+                    a = new DirectionSquare(x, y, this, RIGHT);
+                    break;
                 case Board::event_square:
                 case Board::bank_square:
                 case Board::star_square:

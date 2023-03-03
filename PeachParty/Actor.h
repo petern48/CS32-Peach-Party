@@ -2,6 +2,7 @@
 #define ACTOR_H_
 
 #include "GraphObject.h"
+#include <vector>
 
 class StudentWorld;
 
@@ -41,7 +42,7 @@ public:
 	Character(int imageID, StudentWorld* sw, int startX, int startY, bool impactable = false)
 		:Actor(imageID, sw, startX, startY, impactable) { }
 	int getWalkDirection() const { return m_walkDirection; }
-	void setWalkDirection(int walkDirection) { m_walkDirection = walkDirection; }
+	void setWalkDirection(int walkDirection);
 	virtual void activate() = 0;
 
 	void setState(int state) { m_state = state; }
@@ -51,8 +52,7 @@ protected:
 	int getTicksToMove() const { return m_ticks_to_move; }
 	void setTicksToMove(int ticks) { m_ticks_to_move = ticks; }
 	void turnPerpendicular();
-	void setSpriteDirection(int dir) { dir == left ? setDirection(left) : setDirection(right); }
-	void getLegalMoves(int moves[]);
+	std::vector<int> getLegalMoves();
 
 private:
 	bool m_state = WAITING; // Waiting to Roll or Paused for Baddies
@@ -117,7 +117,7 @@ public:
 
 	// Overloaded Functions for Actor or Player
 	virtual void setActorToActivateOn(Actor* a) { m_actorToActivateOn = a; }
-	virtual void setActorToActivateOn(Player* p) = 0;
+	virtual void setActorToActivateOn(Player* p, bool landed) = 0;
 
 	virtual Actor* getActorToActivateOn() const { return m_actorToActivateOn; }
 	virtual void unactivate() { m_actorToActivateOn = nullptr; }
@@ -133,11 +133,13 @@ public:
 		: Activatable (imageID, sw, startX, startY, impactable, depth, startDir) { }
 
 	virtual Player* getActorToActivateOn() const { return m_playerToActivateOn; }
-	virtual void setActorToActivateOn(Player* p) { m_playerToActivateOn = p; }
-	virtual void unactivate() { m_playerToActivateOn = nullptr; }
+	virtual void setActorToActivateOn(Player* p, bool landed) { m_playerToActivateOn = p; m_landed = landed; }
+	virtual void unactivate() { m_playerToActivateOn = nullptr; m_landed = false; }
+	bool didPlayerLand() { return m_landed; }
 
 private:
 	Player* m_playerToActivateOn = nullptr;
+	bool m_landed = false;
 };
 
 
@@ -198,7 +200,15 @@ public:
 	virtual void doSomething();
 };
 
-
+class DirectionSquare : public Square {
+public:
+	DirectionSquare(int x, int y, StudentWorld* sw, int dir)
+		: Square(IID_DIR_SQUARE, sw, x, y) {
+		setDirection(dir);
+	}
+	virtual void doSomething();
+private:
+};
 
 // BADDIES
 class Baddie : public ActivateOnPlayer {
