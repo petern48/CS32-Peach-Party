@@ -49,7 +49,7 @@ int StudentWorld::init()
         // Determine where each actor is supposed to be on board, save in single STL container of pointers
         for (int x = 0; x < SPRITE_WIDTH; x++)
             for (int y = 0; y < SPRITE_HEIGHT; y++) {
-                Activatable* a = nullptr;
+                Actor* a = nullptr;
                 switch (m_board.getContentsOf(x,y)) {
                 case Board::empty:
                     break;
@@ -129,7 +129,7 @@ int StudentWorld::move()
     m_Peach->doSomething();
     m_Yoshi->doSomething();
 
-    list<Activatable*>::iterator it;
+    list<Actor*>::iterator it;
     for (it = m_actors.begin(); it != m_actors.end(); it++) {
         if ((*it)->isAlive())
             (*it)->doSomething();
@@ -159,7 +159,7 @@ void StudentWorld::cleanUp()
     delete m_Yoshi;
     m_Yoshi = nullptr;
     // Delete other objects
-    list<Activatable*>::iterator it;
+    list<Actor*>::iterator it;
     for (it = m_actors.begin(); it != m_actors.end(); it++) {
         delete (*it);
         (*it) = nullptr;
@@ -233,20 +233,20 @@ string StudentWorld::getStatsString() const {
     return oss.str();
 }
 
-Activatable* StudentWorld::getSquareAt(int x, int y) const {
-    list<Activatable*>::const_iterator it;
+Actor* StudentWorld::getSquareAt(int x, int y) const {
+    list<Actor*>::const_iterator it;
     for (it = m_actors.begin(); it != m_actors.end(); it++)
         if ((*it)->isSquare() && (*it)->getX() == x && (*it)->getY() == y)
             return (*it);
     return nullptr;
 }
 
-Activatable* StudentWorld::getRandomSquare() const {
+Actor* StudentWorld::getRandomSquare() const {
     int sizeOfContainer = m_actors.size();
     int randomInt = randInt(0, sizeOfContainer);
 
-    list<Activatable*>::const_iterator it = m_actors.begin();
-    Activatable* curr;
+    list<Actor*>::const_iterator it = m_actors.begin();
+    Actor* curr;
 
     // Iterate to the random object
     for (int i = 0; i < randomInt; i++)
@@ -264,9 +264,9 @@ Activatable* StudentWorld::getRandomSquare() const {
     return curr;
 }
 
-vector<Activatable*> StudentWorld::getAllBaddies() const {
-    vector<Activatable*> v;
-    list<Activatable*>::const_iterator it;
+vector<Actor*> StudentWorld::getAllBaddies() const {
+    vector<Actor*> v;
+    list<Actor*>::const_iterator it;
     for (it = m_actors.begin(); it != m_actors.end(); it++) {
 
     }

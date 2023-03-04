@@ -25,11 +25,11 @@ public:
   void resetBankCoins() { m_bankMoney = 0; }
 
   bool isValidSquare(int x, int y);
-  Activatable* getSquareAt(int x, int y) const;
-  Activatable* getRandomSquare() const;
+  Actor* getSquareAt(int x, int y) const;
+  Actor* getRandomSquare() const;
   
   Player* getOtherPlayer(Player* p) const; // UNSURE if works properly TODO
-  std::vector<Activatable*> getAllBaddies() const;
+  std::vector<Actor*> getAllBaddies() const;
 
 
 private:
@@ -37,7 +37,7 @@ private:
 	std::string getStatsString() const;
 
 	Board m_board;
-	std::list<Activatable*> m_actors;
+	std::list<Actor*> m_actors;
 	Yoshi* m_Yoshi = nullptr;
 	Peach* m_Peach = nullptr;
 	int m_bankMoney = 0;
