@@ -27,14 +27,12 @@ public:
   Activatable* getSquareAt(int x, int y);
   Activatable* getRandomSquare(); // TODO
   
-
   Player* getOtherPlayer(Player* p) const; // UNSURE if works properly TODO
 
 
 private:
 	Player* getWinner();
 	std::string getStatsString();
-	void deleteActor(Actor* a);
 
 	Board m_board;
 	std::list<Activatable*> m_actors;

@@ -21,7 +21,6 @@ public:
 		:GraphObject(imageID, startX * SPRITE_WIDTH, startY * SPRITE_HEIGHT, startDir, depth),
 		m_studentWorld(sw), m_walkDirection(startDir) { }
 	virtual void doSomething() = 0;
-	//virtual ~Actor();
 
 	void setDead() { m_isAlive = false; }
 	bool isAlive() const { return m_isAlive; }
@@ -29,6 +28,7 @@ public:
 	virtual bool isSquare() const { return false; }
 	virtual bool isPlayer() const { return false; }
 	virtual bool isImpactable() const { return false; }
+	virtual bool isDirectionSquare() const { return false; }
 	
 	// Included here so both Baddies and Players can access them
 	int getWalkDirection() const { return m_walkDirection; }
@@ -93,15 +93,16 @@ public:
 	void turnPerpendicular();
 
 private:
+	int getDirectionCameFrom() const;
+	void swapInts(int &x, int &y);
+
 	int m_stars = 0;
 	int m_coins = 0;
 	bool m_hasVortex = false;
 	int m_playerNum;
 	int m_dieRoll = 0;
-	bool m_teleportNextTurn = false;
 
 	bool m_state = WAITING; // Waiting to Roll
-	// int m_walkDirection = right; // Starting Walking direction is right
 	int m_ticks_to_move = 0;
 };
 
@@ -161,7 +162,6 @@ public:
 	Vortex(StudentWorld *sw, int x, int y, int direction) 
 		: Activatable(IID_VORTEX, sw, x, y), m_firingDirection(direction) { }
 	virtual void doSomething();
-	virtual void activate();
 
 	int getFiringDirection() { return m_firingDirection; }
 
@@ -197,7 +197,7 @@ private:
 class BlueCoinSquare : public CoinSquare {
 public:
 	BlueCoinSquare(int x, int y, StudentWorld *sw)
-		:CoinSquare(IID_BLUE_COIN_SQUARE, sw, x, y, GRANTCOINS) { }
+		: CoinSquare(IID_BLUE_COIN_SQUARE, sw, x, y, GRANTCOINS) { }
 };
 
 class RedCoinSquare : public CoinSquare {
@@ -220,6 +220,7 @@ public:
 		setDirection(dir);
 	}
 	virtual void doSomething();
+	virtual bool isDirectionSquare() const { return true; }
 private:
 };
 

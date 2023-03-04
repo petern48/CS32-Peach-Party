@@ -50,8 +50,6 @@ int StudentWorld::init()
         for (int x = 0; x < SPRITE_WIDTH; x++)
             for (int y = 0; y < SPRITE_HEIGHT; y++) {
                 Activatable* a = nullptr;
-                //list<Actor*>::iterator it = m_actors.end();
-
                 switch (m_board.getContentsOf(x,y)) {
                 case Board::empty:
                     break;
@@ -79,6 +77,8 @@ int StudentWorld::init()
                     a = new DirectionSquare(x, y, this, RIGHT);
                     break;
                 case Board::event_square:
+                    a = new EventSquare(x, y, this);
+                    break;
                 case Board::bank_square:
                     a = new BankSquare(x, y, this);
                     break;
@@ -86,29 +86,22 @@ int StudentWorld::init()
                     a = new StarSquare(x, y, this);
                     break;
                 case Board::bowser:
-                    a = new Bowser(x * SPRITE_WIDTH, y * SPRITE_HEIGHT, this);
+                    a = new Bowser(x, y, this);
+                    m_actors.push_back(a);
+                    a = new BlueCoinSquare(x, y, this); // Bowser starts on BlueCoinSquare
                     break;
                 case Board::boo:
-                    a = new Boo(x * SPRITE_WIDTH, y * SPRITE_HEIGHT, this);
+                    a = new Boo(x, y, this);
+                    m_actors.push_back(a);
+                    a = new BlueCoinSquare(x, y, this); // Boo starts on BlueCoinSquare
                     break;
                 }
                 if (a != nullptr)
                     m_actors.push_back(a);
             }
     }
-
-
-    // May keep pointers to the Peach and Yoshi separate. Everything else must be in above container
-
-    // Initialize other member vars (like money in bank)
     m_bankMoney = 0;
-
-    // Convert grid locations to pixels (SPRITE_WIDTH * x1, SPRITE_HEIGHT * y1).
-
-
-    // Start countdown timer for 
 	startCountdownTimer(LENGTHOFGAME);
-
     return GWSTATUS_CONTINUE_GAME;
 }
 
@@ -161,14 +154,15 @@ int StudentWorld::move()
 // Function may run twice, so set nullptrs
 void StudentWorld::cleanUp()
 {
-    deleteActor(m_Peach);
-    deleteActor(m_Yoshi);
-
+    delete m_Peach;
+    m_Peach = nullptr;
+    delete m_Yoshi;
+    m_Yoshi = nullptr;
     // Delete other objects
     list<Activatable*>::iterator it;
     for (it = m_actors.begin(); it != m_actors.end(); it++) {
-        Actor* ptr = *it;
-        deleteActor(ptr);
+        delete (*it);
+        (*it) = nullptr;
     }
 }
 
@@ -187,13 +181,6 @@ Player* StudentWorld::getOtherPlayer(Player* p) const {
 }
 
 // HELPER FUNCTIONS
-
-void StudentWorld::deleteActor(Actor* a) {
-    if (a != nullptr) {
-        delete a;
-        a = nullptr;
-    }
-}
 
 Player* StudentWorld::getWinner() {
     // Peach has more stars
@@ -258,22 +245,21 @@ Activatable* StudentWorld::getRandomSquare() {
     int sizeOfContainer = m_actors.size();
     int randomInt = randInt(0, sizeOfContainer);
 
-    list<Activatable*>::iterator it = it = m_actors.begin();
+    list<Activatable*>::iterator it = m_actors.begin();
     Activatable* curr;
 
     // Iterate to the random object
-    for (int i = 0; i < randomInt; it++)
+    for (int i = 0; i < randomInt; i++)
         it++;
     // Iterate forward until find a square
     while (true) {
-    curr = *it;
-    if (curr->isSquare()) // Found a square
-        break;
-    it++;
-    // Loop around if needed
-    if (it == m_actors.end())
-        it = m_actors.begin();
+        curr = *it;
+        if (curr->isSquare()) // Found a square
+            break;
+        it++;
+        // Loop around if needed
+        if (it == m_actors.end())
+            it = m_actors.begin();
     }
-
     return curr;
 }

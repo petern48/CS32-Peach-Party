@@ -12,25 +12,21 @@ void Player::doSomething() {
 
 	int nextX, nextY;
 	if (m_state == WAITING) {
-		// Maybe add part where only check if on square exactly (like below)
-
-		// if Avatar has an invalid direction (due to being teleported) TODOOOOOO
-
-		/*
+		// if Avatar has an invalid direction (due to being teleported)
 		getPositionInThisDirection(getWalkDirection(), SPRITE_WIDTH, nextX, nextY);
-		if (getDirection() = INVALIDDIRECTION) {
-			int newDirection;
-
+		if (getWalkDirection() == INVALIDDIRECTION) {
+			int newDirection, randomInt;
 			do {
-			vector<int> legalMoves = getLegalMoves();
-			newDirection = randInt(0, legalMoves.size() - 1);
-			} while (newDirection != getWalkDirection() + 180 && newDirection != getWalkDirection() - 180);
-			// Direction shouldn't be going backwards
+				vector<int> legalMoves;
+				getLegalMoves(this, legalMoves);
+				randomInt = randInt(0, legalMoves.size() - 1);
+				newDirection = legalMoves[randomInt];
+			} while (newDirection != getDirectionCameFrom());
+
 
 			// Set new walk direction (and proper Sprite Direction)
 			setWalkDirection(newDirection);
 		}
-		*/
 		
 		int action = getStudentWorld()->getAction(getPlayerNum());
 		if (action == ACTION_ROLL) {
@@ -41,7 +37,7 @@ void Player::doSomething() {
 
 			m_state = WALKING;
 		}
-		if (action == ACTION_FIRE) {
+		else if (action == ACTION_FIRE) {
 			// TODO
 			// m_vortex = new Vortex();
 
@@ -56,14 +52,17 @@ void Player::doSomething() {
 		}
 	}
 
+
 	if (m_state == WALKING) {
 		// If Avatar directly on top of a square
 		if (getStudentWorld()->isValidSquare(getX(), getY())) {
 
+			Activatable* sq = getStudentWorld()->getSquareAt(getX(), getY());
+
 			// If directly on direction Square TODO  (below during activate)
 
-			// else if Avatar is directly on top of a square at a fork 
-			if (atAFork(this) /* and not on a direction square*/) { // TODO
+			// else if Avatar is directly on top of a square at a fork and not direction square
+			if (atAFork(this) && !sq->isDirectionSquare()) { // TODO
 				int action = getStudentWorld()->getAction(getPlayerNum());
 				int newDir;
 				int directionIndicated = true;
@@ -83,11 +82,11 @@ void Player::doSomething() {
 				// If newDir is legal move
 				vector<int> v;
 				getLegalMoves(this, v);
-				if (find(v.begin(), v.end(), newDir) != v.end())
+				if (find(v.begin(), v.end(), newDir) != v.end() && newDir != getDirectionCameFrom())
 					setWalkDirection(newDir);
+				else
+					return; // Invalid direction provided
 			}
-
-
 
 			getPositionInThisDirection(getWalkDirection(), SPRITE_WIDTH, nextX, nextY);
 			// If avatar can't continue moving forward
@@ -319,22 +318,38 @@ void Boo::doSomething() {
 	
 }
 
+void Player::swapInts(int& x, int& y) {
+	int temp = x;
+	x = y;
+	y = temp;
+}
+
 void Player::swapCoins() {
 	Player* other = getStudentWorld()->getOtherPlayer(this);
-	int temp = getCoins();
-	m_coins = other->getCoins();
-	other->m_coins = temp;
+	swapInts(m_coins, other->m_coins);
 }
 
 void Player::swapStars() {
 	Player* other = getStudentWorld()->getOtherPlayer(this);
-	int temp = getStars();
-	m_stars = other->getStars();
-	other->m_stars = temp;
+	swapInts(m_stars, other->m_stars);
 }
 
 void Player::swapPositions() {
-
+	Player* other = getStudentWorld()->getOtherPlayer(this);
+	int temp1 = getX();
+	int temp2 = getY();
+	// Swap Locations
+	moveTo(other->getX(), other->getY());
+	other->moveTo(temp1, temp2);
+	// Swap number of ticks
+	swapInts(m_ticks_to_move, other->m_ticks_to_move);
+	// Swap walking directions, (updating Sprite Directions)
+	temp1 = getWalkDirection();
+	setWalkDirection(other->getWalkDirection());
+	other->setWalkDirection(temp1);
+	bool tempBool = m_state;
+	m_state = other->m_state;
+	other->m_state = tempBool;
 }
 
 // Teleport and set walk direction to invalid
@@ -344,4 +359,19 @@ void Player::teleportToRandomSq() {
 	int newY = sq->getY();
 	moveTo(newX, newY);
 	setWalkDirection(INVALIDDIRECTION);
+}
+
+int Player::getDirectionCameFrom() const {
+	switch (getWalkDirection()) {
+	case right:
+		return left;
+	case left:
+		return right;
+	case up:
+		return down;
+	case down:
+		return up;
+	default:
+		return -1; // Can't reach this
+	}
 }
