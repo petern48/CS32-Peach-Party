@@ -89,7 +89,7 @@ public:
 		:Character(imageID, sw, startX, startY), m_playerNum(playerNum) { } // Default depth of 0, default startDirection of right
 
 	int getPlayerNum() const { return m_playerNum; }
-	void addStar() { m_stars++; }
+	void setStars(int stars) { m_stars = stars; }
 	int getStars() const { return m_stars; }
 	void setCoins(int coins) { m_coins = coins; }
 	int getCoins() const { return m_coins; }
@@ -129,22 +129,6 @@ public:
 		:Player(IID_YOSHI, sw, startX, startY, 2) { }
 };
 
-/*
-class ActivateOnPlayer : public Actor {
-public:
-	ActivateOnPlayer(int imageID, StudentWorld* sw, int startX, int startY, int depth = 0, int startDir = right)
-		: Actor(imageID, sw, startX, startY, depth, startDir) { }
-
-	// Overloaded virtual functions to specific activate on player
-	virtual Player* getActorToActivateOn() const { return m_playerToActivateOn; }
-	virtual void setActorToActivateOn(Player* p, bool landed) { m_playerToActivateOn = p; m_landed = landed; }
-	virtual void unactivate() { m_playerToActivateOn = nullptr; m_landed = false; }
-
-private:
-	Player* m_playerToActivateOn = nullptr;
-	bool m_landed = false;
-};
-*/
 
 // SQUARES
 class Square : public Actor {
@@ -209,6 +193,13 @@ class EventSquare : public Square {
 public:
 	EventSquare(int x, int y, StudentWorld* sw)
 		: Square(IID_EVENT_SQUARE, sw, x, y) { }
+	virtual void doSomething();
+};
+
+class DroppingSquare : public Square {
+public:
+	DroppingSquare(int x, int y, StudentWorld* sw)
+		: Square(IID_DROPPING_SQUARE, sw, x, y) { }
 	virtual void doSomething();
 };
 

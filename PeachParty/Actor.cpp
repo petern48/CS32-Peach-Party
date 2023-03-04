@@ -37,13 +37,11 @@ void Player::doSomething() {
 			sw->addActor(a);
 			sw->playSound(SOUND_PLAYER_FIRE);
 		}
-
 		// User didn't press a key or any other key
 		else {
 			return;
 		}
 	}
-
 
 	if (getState() == WALKING) {
 		// If Avatar directly on top of a square
@@ -122,7 +120,7 @@ void Player::activate() {
 
 bool Character::atAFork() {
 	vector<int> validDir = getLegalMoves();
-	// If can move at least two directions, return true, else false
+	// If can move at least three directions, return true, else false
 	return validDir.size() >= 3 ? true : false; // Must have 3 legal directions (2 would just be a turn)
 }
 
@@ -209,7 +207,7 @@ void StarSquare::doSomething() {
 	if (p != nullptr && p->isPlayer() && p->getCoins() >= COINSFORASTAR) { // Doesn't need to land
 		// Replace 20 coins per stars
 		p->setCoins(p->getCoins() - COINSFORASTAR);
-		p->addStar();
+		p->setStars(p->getStars() + 1);
 		getStudentWorld()->playSound(SOUND_GIVE_STAR);
 		unactivate();
 	}
@@ -219,7 +217,7 @@ void StarSquare::doSomething() {
 void DirectionSquare::doSomething() {
 	if (!isAlive())
 		return;
-	Character* p = getActorToActivateOn();
+	Player* p = getPlayerToActivateOn();
 	// If activated by a player
 	if (p != nullptr) {  // Doesn't need to land
 		p->setWalkDirection(getDirection());
@@ -279,6 +277,29 @@ void EventSquare::doSomething() {
 	}
 }
 
+void DroppingSquare::doSomething() {
+	if (!isAlive())
+		return;
+	Player* p = getPlayerToActivateOn();
+
+	if (p != nullptr && didCharacterLand()) {
+		int rand = randInt(1, 2);
+		if (rand == 1) {
+			int newCoins = p->getCoins() - 10; // Deduct 10
+			if (newCoins < 0)
+				newCoins = 0;
+			p->setCoins(newCoins);
+		}
+		else {
+			int newStars = p->getStars() - 1;
+			if (newStars < 0)
+				newStars = 0;
+			p->setStars(newStars);
+		}
+
+		getStudentWorld()->playSound(SOUND_DROPPING_SQUARE_ACTIVATE);
+	}
+}
 
 void Vortex::doSomething() {
 	if (!isAlive())
@@ -309,7 +330,7 @@ vector<Actor*> Vortex::overlapsWithABaddie() const { // TODO
 	vector<Actor*> v = getStudentWorld()->getAllBaddies();
 	// if (impactable)
 	return v;
-}
+} // TODO
 
 
 void Baddie::doSomething() {
@@ -380,13 +401,20 @@ void Bowser::waitingAct() {
 }
 
 void Bowser::doneWalkingAct() {
-	Baddie::doneWalkingAct();
-	
-	// 25 percent chance
-	int chance = randInt(1, 3);
-	if (chance == 1) {
-		// TODO
 
+	Baddie::doneWalkingAct();
+
+	// 25 percent chance
+	int chance = randInt(1, 4);
+	if (chance == 1) {
+		// Remove current square
+		Actor* sq = getStudentWorld()->getSquareAt(getX(), getY());
+		sq->setDead();
+		// Create Dropping Square
+		Actor* a = new DroppingSquare(getX(), getY(), getStudentWorld());
+		getStudentWorld()->addActor(a);
+
+		getStudentWorld()->playSound(SOUND_DROPPING_SQUARE_CREATED);
 	}
 }
 
