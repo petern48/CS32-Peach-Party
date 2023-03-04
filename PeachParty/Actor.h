@@ -35,17 +35,21 @@ public:
 	virtual bool isBaddie() const { return false; }
 
 	virtual void hitByVortex() { }
-	void setLanded(bool landed) { m_landed = landed; }
 	bool didCharacterLand() { return m_landed; }
-	virtual void setActorToActivateOn(Player* p, bool landed) { }; // Overloaded function
-	void setActorToActivateOn(Character* p, bool landed) { m_characterToActivateOn = p; setLanded(landed); }
-	virtual Character* getActorToActivateOn() const { return m_characterToActivateOn; }
-	virtual void unactivate() { m_characterToActivateOn = nullptr; setLanded(false); }
+	void setActorToActivateOn(Character* p, bool landed);
+	Character* getActorToActivateOn() const { return m_characterToActivateOn; }
+	void unactivate();
+
+	// Overloaded Function for Player instead of Character
+	void setActorToActivateOn(Player* p, bool landed);
+	Player* getPlayerToActivateOn() const { return m_playerToActivateOn; }
+
 
 private:
 	StudentWorld* m_studentWorld;
 	bool m_isAlive = true;
 	
+	Player* m_playerToActivateOn = nullptr;
 	Character* m_characterToActivateOn = nullptr;
 	bool m_landed = false;
 };
@@ -66,6 +70,8 @@ public:
 	void teleportToRandomSq();
 	void turnPerpendicular();
 	int getDirectionCameFrom() const;
+	bool squareInFrontExists() const;
+	bool isOnASquare() const;
 	bool atAFork();
 	std::vector<int> getLegalMoves();
 
@@ -109,9 +115,6 @@ private:
 	bool m_hasVortex = false;
 	int m_playerNum;
 	int m_dieRoll = 0;
-
-	bool m_state = WAITING; // Waiting to Roll
-	int m_ticks_to_move = 0;
 };
 
 class Peach : public Player {
@@ -126,7 +129,7 @@ public:
 		:Player(IID_YOSHI, sw, startX, startY, 2) { }
 };
 
-
+/*
 class ActivateOnPlayer : public Actor {
 public:
 	ActivateOnPlayer(int imageID, StudentWorld* sw, int startX, int startY, int depth = 0, int startDir = right)
@@ -141,12 +144,13 @@ private:
 	Player* m_playerToActivateOn = nullptr;
 	bool m_landed = false;
 };
+*/
 
 // SQUARES
-class Square : public ActivateOnPlayer {
+class Square : public Actor {
 public:
 	Square(int imageID, StudentWorld* sw, int X, int Y)
-		:ActivateOnPlayer(imageID, sw, X, Y, 1) { }
+		:Actor(imageID, sw, X, Y, 1) { }
 	virtual bool isSquare() const { return true; }
 
 private:
@@ -212,32 +216,41 @@ public:
 // BADDIES
 class Baddie : public Character {
 public:
-	Baddie(int imageID, StudentWorld* sw, int startX, int startY, int pauseCounter = 180)
-		: Character(imageID, sw, startX, startY), m_pauseCounter(pauseCounter) { }
+	Baddie(int imageID, StudentWorld* sw, int startX, int startY, int rangeToMove, int pauseCounter = 180)
+		: Character(imageID, sw, startX, startY), m_pauseCounter(pauseCounter), m_rangeToMove(rangeToMove) { }
+	virtual void doSomething();
 
 	virtual bool isImpactable() const { return true; }
-	virtual bool isBaddie() { return true; }
-	virtual void doSomething();
+	virtual bool isBaddie() const { return true; }
+	void decreasePauseCounter() { m_pauseCounter--; }
+	int getPauseCounter() const { return m_pauseCounter; }
+	virtual void waitingAct() = 0;
+	virtual void doneWalkingAct();
 
 	virtual void hitByVortex();
 
 private:
+	void setRandomLegalDirection();
+
 	int m_pauseCounter;
 	int squares_to_move = 0;
+	int m_rangeToMove;
 };
 
 class Bowser : public Baddie {
 public:
 	Bowser(int startX, int startY, StudentWorld* sw)
-	: Baddie(IID_BOWSER, sw, startX, startY) { }
+	: Baddie(IID_BOWSER, sw, startX, startY, 10) { }
 	virtual void doSomething();
+	virtual void waitingAct();
+	virtual void doneWalkingAct();
 };
 
 class Boo : public Baddie {
 public:
 	Boo(int startX, int startY, StudentWorld* sw)
-		: Baddie(IID_BOO, sw, startX, startY) { }
-	virtual void doSomething();
+		: Baddie(IID_BOO, sw, startX, startY, 3) { }
+	virtual void waitingAct();
 };
 
 

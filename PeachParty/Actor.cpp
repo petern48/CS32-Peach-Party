@@ -8,7 +8,7 @@ using namespace std;
 // Player Avatar
 void Player::doSomething() {
 
-	if (m_state == WAITING) {
+	if (getState() == WAITING) {
 		// if Avatar has an invalid direction (due to being teleported)
 		if (getWalkDirection() == INVALIDDIRECTION) {
 			int newDirection, randomInt;
@@ -25,9 +25,9 @@ void Player::doSomething() {
 			int die_roll = randInt(1, 10);
 			setRoll(die_roll);
 
-			m_ticks_to_move = die_roll * 8;
+			setTicksToMove(die_roll * 8);
 
-			m_state = WALKING;
+			setState(WALKING);
 		}
 		else if (action == ACTION_FIRE) {
 			StudentWorld* sw = getStudentWorld();
@@ -45,9 +45,9 @@ void Player::doSomething() {
 	}
 
 
-	if (m_state == WALKING) {
+	if (getState() == WALKING) {
 		// If Avatar directly on top of a square
-		if (getStudentWorld()->isValidSquare(getX(), getY())) {
+		if (isOnASquare()) {
 
 			Actor* sq = getStudentWorld()->getSquareAt(getX(), getY());
 
@@ -80,25 +80,23 @@ void Player::doSomething() {
 					else
 						return; // Invalid direction provided
 				}
-				int nextX, nextY;
-				getPositionInThisDirection(getWalkDirection(), SPRITE_WIDTH, nextX, nextY);
+
 				// If avatar can't continue moving forward
-				if (!getStudentWorld()->isValidSquare(nextX, nextY))
+				if (!squareInFrontExists())
 					turnPerpendicular();
 			}
 		}
 		
 		// Move two pixels in the walk direction  (2 pixels per tick)
 		moveAtAngle(getWalkDirection(), 2);
-		// Decrement ticks to move by 1
-		m_ticks_to_move--;
+		setTicksToMove(getTicksToMove() - 1);
 
 		// Tell actors to activate next tick
 		activate();
 
 		// If done moving, change to waiting to roll state
-		if (m_ticks_to_move == 0)
-			m_state = WAITING;
+		if (getTicksToMove() == 0)
+			setState(WAITING);
 	}
 }
 
@@ -106,11 +104,11 @@ void Player::activate() {
 
 	// Search for square Actor might be on
 	Actor* square = getStudentWorld()->getSquareAt(getX(), getY());
-
+	vector<Actor*> baddies = getStudentWorld()->getAllBaddies();
 	bool landed = false;
 
 	// If just stopped moving, landed is true
-	if (m_ticks_to_move == 0)
+	if (getTicksToMove() == 0)
 		landed = true;
 
 	if (square != nullptr)
@@ -178,7 +176,7 @@ void Character::turnPerpendicular() {
 void CoinSquare::doSomething() {
 	if (!isAlive())
 		return;
-	Player* p = getActorToActivateOn();
+	Player* p = getPlayerToActivateOn();
 
 	// Player must have landed on square
 	if (p != nullptr && didCharacterLand()) {
@@ -206,7 +204,7 @@ void StarSquare::doSomething() {
 	if (!isAlive())
 		return;
 
-	Player* p = getActorToActivateOn();
+	Player* p = getPlayerToActivateOn();
 	// If activated and has enough coins
 	if (p != nullptr && p->isPlayer() && p->getCoins() >= COINSFORASTAR) { // Doesn't need to land
 		// Replace 20 coins per stars
@@ -232,7 +230,7 @@ void DirectionSquare::doSomething() {
 void BankSquare::doSomething() {
 	if (!isAlive())
 		return;
-	Player* p = getActorToActivateOn();
+	Player* p = getPlayerToActivateOn();
 	// If activated by a player
 	if (p != nullptr) {
 
@@ -259,7 +257,7 @@ void BankSquare::doSomething() {
 void EventSquare::doSomething() {
 	if (!isAlive())
 		return;
-	Player* p = getActorToActivateOn();
+	Player* p = getPlayerToActivateOn();
 	// If activated by a player
 	if (p != nullptr && didCharacterLand()) {  // Needs to land
 		int option = randInt(1, 3);
@@ -315,7 +313,39 @@ vector<Actor*> Vortex::overlapsWithABaddie() const { // TODO
 
 
 void Baddie::doSomething() {
+	if (getState() == WAITING) {
+		waitingAct(); // different for Boo or Bowser
 
+		decreasePauseCounter();
+
+		if (getPauseCounter() == 0) {
+			squares_to_move = randInt(1, m_rangeToMove);
+
+			setTicksToMove(squares_to_move * 8);
+			
+			setRandomLegalDirection();
+
+			setState(WALKING);
+		}
+	}
+	// if in WALKING state
+	else {
+
+		if (atAFork()) {
+			setRandomLegalDirection();
+		}
+		// If Baddie on a square, but no square in front of it
+		else if (isOnASquare() && !squareInFrontExists()) {
+			turnPerpendicular();
+		}
+
+		moveAtAngle(getWalkDirection(), 2);
+
+		setTicksToMove(getTicksToMove() - 1);;
+
+		if (getTicksToMove() == 0)
+			doneWalkingAct();
+	}
 }
 
 void Bowser::doSomething() {
@@ -326,9 +356,37 @@ void Bowser::doSomething() {
 	*/
 }
 
-void Boo::doSomething() {
-	if (getState() == WAITING) {
-		//Player* p = getActorToActivateOn();
+void Boo::waitingAct() {
+	Player* p = getPlayerToActivateOn();
+
+	// Choose either to swap coins or stars
+	if (p != nullptr) {
+		int n = randInt(0, 1);
+		if (n == 1)
+			p->swapCoins();
+		else
+			p->swapStars();
+		getStudentWorld()->playSound(SOUND_BOO_ACTIVATE);
+	}
+}
+
+void Baddie::doneWalkingAct() {
+	setState(WAITING);
+	m_pauseCounter = 180;
+}
+
+void Bowser::waitingAct() {
+
+}
+
+void Bowser::doneWalkingAct() {
+	Baddie::doneWalkingAct();
+	
+	// 25 percent chance
+	int chance = randInt(1, 3);
+	if (chance == 1) {
+		// TODO
+
 	}
 }
 
@@ -357,14 +415,17 @@ void Player::swapPositions() {
 	moveTo(other->getX(), other->getY());
 	other->moveTo(temp1, temp2);
 	// Swap number of ticks
-	swapInts(m_ticks_to_move, other->m_ticks_to_move);
+	temp1 = getTicksToMove();
+	setTicksToMove(other->getTicksToMove());
+	other->setTicksToMove(temp1);
 	// Swap walking directions, (updating Sprite Directions)
 	temp1 = getWalkDirection();
 	setWalkDirection(other->getWalkDirection());
 	other->setWalkDirection(temp1);
-	bool tempBool = m_state;
-	m_state = other->m_state;
-	other->m_state = tempBool;
+	// Swap States
+	bool tempBool = getState();
+	setState(other->getState());
+	other->setState(tempBool);
 }
 
 // Teleport and set walk direction to invalid
@@ -398,4 +459,39 @@ void Baddie::hitByVortex() {
 		setState(WAITING);
 		m_pauseCounter = 180;
 	}
+}
+
+void Actor::unactivate() { 
+	m_characterToActivateOn = nullptr; 
+	m_playerToActivateOn = nullptr;
+	m_landed = false;
+}
+
+void Actor::setActorToActivateOn(Character* p, bool landed) { 
+	m_characterToActivateOn = p;
+	m_landed = landed; 
+}
+
+void Actor::setActorToActivateOn(Player* p, bool landed) { 
+	m_playerToActivateOn = p; 
+	m_landed = landed; 
+}
+
+void Baddie::setRandomLegalDirection() {
+	vector<int> legalMoves = getLegalMoves();
+	int randIdx = randInt(0, legalMoves.size() - 1);
+	int newDir = legalMoves[randIdx];
+	setWalkDirection(newDir);
+}
+
+bool Character::squareInFrontExists() const {
+	int newX, newY;
+	getPositionInThisDirection(getWalkDirection(), SPRITE_WIDTH, newX, newY);
+	if (getStudentWorld()->isValidSquare(newX, newY))
+		return true;
+	return false;
+}
+
+bool Character::isOnASquare() const { 
+	return getStudentWorld()->isValidSquare(getX(), getY()); 
 }
