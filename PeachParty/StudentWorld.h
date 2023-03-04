@@ -20,6 +20,7 @@ public:
   virtual void cleanUp();
   virtual ~StudentWorld();
 
+  void addActor(Actor* a) { m_actors.push_back(a); }
   int getBankCoins() const { return m_bankMoney; }
   void depositBankCoins(int c) { m_bankMoney += c; }
   void resetBankCoins() { m_bankMoney = 0; }

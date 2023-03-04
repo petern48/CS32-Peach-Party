@@ -167,8 +167,7 @@ void StudentWorld::cleanUp()
 }
 
 
-StudentWorld::~StudentWorld()
-{
+StudentWorld::~StudentWorld() {
     cleanUp();
 }
 
@@ -267,8 +266,8 @@ Actor* StudentWorld::getRandomSquare() const {
 vector<Actor*> StudentWorld::getAllBaddies() const {
     vector<Actor*> v;
     list<Actor*>::const_iterator it;
-    for (it = m_actors.begin(); it != m_actors.end(); it++) {
-
-    }
+    for (it = m_actors.begin(); it != m_actors.end(); it++)
+        if ((*it)->isBaddie())
+            v.push_back((*it));
     return v;
 }

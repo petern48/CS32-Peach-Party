@@ -5,15 +5,11 @@ using namespace std;
 
 // Students:  Add code to this file, Actor.h, StudentWorld.h, and StudentWorld.cpp
 
-// Actor
-
 // Player Avatar
 void Player::doSomething() {
 
-	int nextX, nextY;
 	if (m_state == WAITING) {
 		// if Avatar has an invalid direction (due to being teleported)
-		getPositionInThisDirection(getWalkDirection(), SPRITE_WIDTH, nextX, nextY);
 		if (getWalkDirection() == INVALIDDIRECTION) {
 			int newDirection, randomInt;
 			do {
@@ -21,10 +17,7 @@ void Player::doSomething() {
 				randomInt = randInt(0, legalMoves.size() - 1);
 				newDirection = legalMoves[randomInt];
 			} while (newDirection != getDirectionCameFrom());
-
-
-			// Set new walk direction (and proper Sprite Direction)
-			setWalkDirection(newDirection);
+			setWalkDirection(newDirection); // Set new Walk and Sprite Direction
 		}
 		
 		int action = getStudentWorld()->getAction(getPlayerNum());
@@ -37,12 +30,12 @@ void Player::doSomething() {
 			m_state = WALKING;
 		}
 		else if (action == ACTION_FIRE) {
-			// TODO
-			// m_vortex = new Vortex();
-
-			getStudentWorld()->playSound(SOUND_PLAYER_FIRE);
-
-			// delete
+			StudentWorld* sw = getStudentWorld();
+			int newX, newY;
+			getPositionInThisDirection(getWalkDirection(), SPRITE_HEIGHT, newX, newY);
+			Actor* a = new Vortex(sw, newX, newY, getWalkDirection());
+			sw->addActor(a);
+			sw->playSound(SOUND_PLAYER_FIRE);
 		}
 
 		// User didn't press a key or any other key
@@ -87,7 +80,7 @@ void Player::doSomething() {
 					else
 						return; // Invalid direction provided
 				}
-
+				int nextX, nextY;
 				getPositionInThisDirection(getWalkDirection(), SPRITE_WIDTH, nextX, nextY);
 				// If avatar can't continue moving forward
 				if (!getStudentWorld()->isValidSquare(nextX, nextY))
@@ -303,25 +296,27 @@ void Vortex::doSomething() {
 	}
 
 	// Check if overlap
-	// TODO
 	vector<Actor*> impactables = overlapsWithABaddie();
 	if (impactables.size() != 0) {
-
-
+		// Pick one
+		Actor* target = impactables[0];
+		target->hitByVortex();
 		setDead();
 		getStudentWorld()->playSound(SOUND_HIT_BY_VORTEX);
-
 	}
 
 }
 
-vector<Actor*> Vortex::overlapsWithABaddie() const {
+vector<Actor*> Vortex::overlapsWithABaddie() const { // TODO
 	vector<Actor*> v = getStudentWorld()->getAllBaddies();
-	// TODO
 	// if (impactable)
 	return v;
 }
 
+
+void Baddie::doSomething() {
+
+}
 
 void Bowser::doSomething() {
 	/*
@@ -332,9 +327,10 @@ void Bowser::doSomething() {
 }
 
 void Boo::doSomething() {
-	
+	if (getState() == WAITING) {
+		//Player* p = getActorToActivateOn();
+	}
 }
-
 
 
 void Player::swapInts(int& x, int& y) {
@@ -392,5 +388,14 @@ int Character::getDirectionCameFrom() const {
 		return up;
 	default:
 		return -1; // Can't reach this
+	}
+}
+
+void Baddie::hitByVortex() {
+	if (isBaddie()) {
+		teleportToRandomSq();
+		setWalkDirection(right);
+		setState(WAITING);
+		m_pauseCounter = 180;
 	}
 }

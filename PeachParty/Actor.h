@@ -34,6 +34,7 @@ public:
 	virtual bool isDirectionSquare() const { return false; }
 	virtual bool isBaddie() const { return false; }
 
+	virtual void hitByVortex() { }
 	void setLanded(bool landed) { m_landed = landed; }
 	bool didCharacterLand() { return m_landed; }
 	virtual void setActorToActivateOn(Player* p, bool landed) { }; // Overloaded function
@@ -214,14 +215,15 @@ public:
 	Baddie(int imageID, StudentWorld* sw, int startX, int startY, int pauseCounter = 180)
 		: Character(imageID, sw, startX, startY), m_pauseCounter(pauseCounter) { }
 
-	virtual void activate() { }
 	virtual bool isImpactable() const { return true; }
 	virtual bool isBaddie() { return true; }
+	virtual void doSomething();
 
-	// void impactBaddie();
+	virtual void hitByVortex();
 
 private:
 	int m_pauseCounter;
+	int squares_to_move = 0;
 };
 
 class Bowser : public Baddie {
