@@ -13,6 +13,7 @@ const bool WALKING = true;
 const int GRANTCOINS = 3;
 const int DEDUCTCOINS = -3;
 const int COINSFORASTAR = 20;
+const int INVALIDDIRECTION = -1;
 
 class Actor : public GraphObject {
 public:
@@ -29,12 +30,9 @@ public:
 	virtual bool isPlayer() const { return false; }
 	virtual bool isImpactable() const { return false; }
 	
-
 	// Included here so both Baddies and Players can access them
 	int getWalkDirection() const { return m_walkDirection; }
 	void setWalkDirection(int dir);
-	
-	
 
 private:
 	StudentWorld* m_studentWorld;
@@ -80,7 +78,7 @@ public:
 
 	int getRoll() const { return m_dieRoll; }
 	void setRoll(int roll) { m_dieRoll = roll; }
-	bool hasVortex() { return m_hasVortex; }
+	bool hasVortex() const { return m_hasVortex; }
 	void equipWithVortex() { m_hasVortex = true; }
 	void swapPositions();
 	void swapStars();
@@ -100,6 +98,7 @@ private:
 	bool m_hasVortex = false;
 	int m_playerNum;
 	int m_dieRoll = 0;
+	bool m_teleportNextTurn = false;
 
 	bool m_state = WAITING; // Waiting to Roll
 	// int m_walkDirection = right; // Starting Walking direction is right
@@ -230,6 +229,14 @@ public:
 		: Square(IID_BANK_SQUARE, sw, x, y) { }
 	virtual void doSomething();
 };
+
+class EventSquare : public Square {
+public:
+	EventSquare(int x, int y, StudentWorld* sw)
+		: Square(IID_EVENT_SQUARE, sw, x, y) { }
+	virtual void doSomething();
+};
+
 
 // BADDIES
 class Baddie : public ActivateOnPlayer {

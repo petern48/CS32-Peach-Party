@@ -18,7 +18,7 @@ void Player::doSomething() {
 
 		/*
 		getPositionInThisDirection(getWalkDirection(), SPRITE_WIDTH, nextX, nextY);
-		if (!getStudentWorld()->isValidSquare(nextX, nextY)) {
+		if (getDirection() = INVALIDDIRECTION) {
 			int newDirection;
 
 			do {
@@ -155,6 +155,7 @@ void Actor::setWalkDirection(int dir) {
 	m_walkDirection = dir; 
 	if (dir == left)
 		setDirection(left);
+	else if (dir == INVALIDDIRECTION) { } // Don't change Sprite Direction
 	else
 		setDirection(right);
 }
@@ -205,7 +206,7 @@ void CoinSquare::doSomething() {
 	Player* p = getActorToActivateOn();
 
 	// Player must have landed on square
-	if (p != nullptr && didPlayerLand() == true) {
+	if (p != nullptr && didPlayerLand()) {
 		updateCoins(p);
 		unactivate();
 	}
@@ -280,6 +281,31 @@ void BankSquare::doSomething() {
 	}
 }
 
+void EventSquare::doSomething() {
+	if (!isAlive())
+		return;
+	Player* p = getActorToActivateOn();
+	// If activated by a player
+	if (p != nullptr && didPlayerLand()) {  // Needs to land
+		int option = randInt(1, 3);
+		switch (option) {
+		case 1:
+			p->teleportToRandomSq();
+			getStudentWorld()->playSound(SOUND_PLAYER_TELEPORT);
+			break;
+		case 2:
+			p->swapPositions();
+			getStudentWorld()->playSound(SOUND_PLAYER_TELEPORT);
+			break;
+		case 3:
+			p->equipWithVortex();
+			getStudentWorld()->playSound(SOUND_GIVE_VORTEX);
+			break;
+		}
+		unactivate();
+	}
+}
+
 
 void Bowser::doSomething() {
 	/*
@@ -291,4 +317,31 @@ void Bowser::doSomething() {
 
 void Boo::doSomething() {
 	
+}
+
+void Player::swapCoins() {
+	Player* other = getStudentWorld()->getOtherPlayer(this);
+	int temp = getCoins();
+	m_coins = other->getCoins();
+	other->m_coins = temp;
+}
+
+void Player::swapStars() {
+	Player* other = getStudentWorld()->getOtherPlayer(this);
+	int temp = getStars();
+	m_stars = other->getStars();
+	other->m_stars = temp;
+}
+
+void Player::swapPositions() {
+
+}
+
+// Teleport and set walk direction to invalid
+void Player::teleportToRandomSq() {
+	Activatable* sq = getStudentWorld()->getRandomSquare();
+	int newX = sq->getX();
+	int newY = sq->getY();
+	moveTo(newX, newY);
+	setWalkDirection(INVALIDDIRECTION);
 }

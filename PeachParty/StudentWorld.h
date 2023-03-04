@@ -25,10 +25,10 @@ public:
 
   bool isValidSquare(int x, int y);
   Activatable* getSquareAt(int x, int y);
-  Actor* getRandomSquare();
+  Activatable* getRandomSquare(); // TODO
   
 
-  Player* getOtherPlayer(Player* p) const;
+  Player* getOtherPlayer(Player* p) const; // UNSURE if works properly TODO
 
 
 private:

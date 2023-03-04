@@ -253,3 +253,27 @@ Activatable* StudentWorld::getSquareAt(int x, int y) {
             return (*it);
     return nullptr;
 }
+
+Activatable* StudentWorld::getRandomSquare() {
+    int sizeOfContainer = m_actors.size();
+    int randomInt = randInt(0, sizeOfContainer);
+
+    list<Activatable*>::iterator it = it = m_actors.begin();
+    Activatable* curr;
+
+    // Iterate to the random object
+    for (int i = 0; i < randomInt; it++)
+        it++;
+    // Iterate forward until find a square
+    while (true) {
+    curr = *it;
+    if (curr->isSquare()) // Found a square
+        break;
+    it++;
+    // Loop around if needed
+    if (it == m_actors.end())
+        it = m_actors.begin();
+    }
+
+    return curr;
+}
