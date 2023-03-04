@@ -1,5 +1,6 @@
 #include "Actor.h"
 #include "StudentWorld.h"
+#include <algorithm>
 using namespace std;
 
 // Students:  Add code to this file, Actor.h, StudentWorld.h, and StudentWorld.cpp
@@ -10,7 +11,7 @@ using namespace std;
 void Player::doSomething() {
 
 	int nextX, nextY;
-	if (getState() == WAITING) {
+	if (m_state == WAITING) {
 		// Maybe add part where only check if on square exactly (like below)
 
 		// if Avatar has an invalid direction (due to being teleported) TODOOOOOO
@@ -36,9 +37,9 @@ void Player::doSomething() {
 			int die_roll = randInt(1, 10);
 			setRoll(die_roll);
 
-			setTicksToMove(die_roll * 8);
+			m_ticks_to_move = die_roll * 8;
 
-			setState(WALKING);
+			m_state = WALKING;
 		}
 		if (action == ACTION_FIRE) {
 			// TODO
@@ -55,14 +56,38 @@ void Player::doSomething() {
 		}
 	}
 
-	if (getState() == WALKING) {
-
-		// TODO Part 2
-
+	if (m_state == WALKING) {
 		// If Avatar directly on top of a square
 		if (getStudentWorld()->isValidSquare(getX(), getY())) {
 
-			// else if Avatar is directly on top of a square at a fork
+			// If directly on direction Square TODO  (below during activate)
+
+			// else if Avatar is directly on top of a square at a fork 
+			if (atAFork(this) /* and not on a direction square*/) { // TODO
+				int action = getStudentWorld()->getAction(getPlayerNum());
+				int newDir;
+				int directionIndicated = true;
+				// if user pressed a key
+				switch (action) {
+				case ACTION_DOWN:
+					newDir = down; break;
+				case ACTION_LEFT:
+					newDir = left; break;
+				case ACTION_UP:
+					newDir = up; break;
+				case ACTION_RIGHT:
+					newDir = right; break;
+				default:
+					return; // If no direction indicated
+				}
+				// If newDir is legal move
+				vector<int> v;
+				getLegalMoves(this, v);
+				if (find(v.begin(), v.end(), newDir) != v.end())
+					setWalkDirection(newDir);
+			}
+
+
 
 			getPositionInThisDirection(getWalkDirection(), SPRITE_WIDTH, nextX, nextY);
 			// If avatar can't continue moving forward
@@ -77,14 +102,14 @@ void Player::doSomething() {
 		moveAtAngle(getWalkDirection(), 2);
 
 		// Decrement ticks to move by 1
-		setTicksToMove(getTicksToMove() - 1);
+		m_ticks_to_move--;
 
 		// Tell actors to activate next tick
 		activate();
 
 		// If done moving, change to waiting to roll state
-		if (getTicksToMove() == 0)
-			setState(WAITING);
+		if (m_ticks_to_move == 0)
+			m_state = WAITING;
 	}
 }
 
@@ -96,32 +121,46 @@ void Player::activate() {
 	bool landed = false;
 
 	// If just stopped moving, landed is true
-	if (getTicksToMove() == 0)
+	if (m_ticks_to_move == 0)
 		landed = true;
 
 	if (square != nullptr)
 		square->setActorToActivateOn(this, landed);
 
-	// Still walking
 }
 
-/*
-Activatable::doSomething() {
 
+
+bool atAFork(Actor *a) {
+	vector<int> validDir;
+	getLegalMoves(a, validDir);
+	// If can move at least two directions, return true, else false
+	return validDir.size() >= 3 ? true : false; // Must have 3 legal directions (2 would just be a turn)
 }
-*/
+
+void getLegalMoves(Actor* a, std::vector<int> &movesAllowed) {
+	int nextX, nextY;
+	int direction = 0;
+	for (int i = 0; i < 4; i++) {
+		a->getPositionInThisDirection(direction, SPRITE_WIDTH, nextX, nextY);
+		if (a->getStudentWorld()->isValidSquare(nextX, nextY))
+			movesAllowed.push_back(direction);
+		direction += 90;
+	}
+}
+
 
 // Set Walk Direction and Sprite direction accordingly
-void Character::setWalkDirection(int walkDirection) { 
-	m_walkDirection = walkDirection; 
-	if (walkDirection == left)
+void Actor::setWalkDirection(int dir) { 
+	m_walkDirection = dir; 
+	if (dir == left)
 		setDirection(left);
 	else
 		setDirection(right);
 }
 
 // Prefer turning to left or right
-void Character::turnPerpendicular() {
+void Player::turnPerpendicular() {
 	switch (getWalkDirection()) {
 	case right:
 	case left:
@@ -140,18 +179,6 @@ void Character::turnPerpendicular() {
 	}
 }
 
-std::vector<int> Character::getLegalMoves() {
-	vector<int> movesAllowed;
-	int nextX, nextY;
-	int direction = 0;
-	for (int i = 0; i < 4; i++) {
-		getPositionInThisDirection(getWalkDirection(), SPRITE_WIDTH, nextX, nextY);
-		if (getStudentWorld()->isValidSquare(nextX, nextY) && direction)
-			movesAllowed.push_back(direction);
-		direction += 90;
-	}
-	return movesAllowed;
-}
 
 void Vortex::doSomething() {
 	if (!isAlive())
@@ -205,11 +232,12 @@ void StarSquare::doSomething() {
 
 	Player* p = getActorToActivateOn();
 	// If activated and has enough coins
-	if (p != nullptr && p->getCoins() >= COINSFORASTAR) {
+	if (p != nullptr && p->getCoins() >= COINSFORASTAR) { // Doesn't need to land
 		// Replace 20 coins per stars
 		p->setCoins(p->getCoins() - COINSFORASTAR);
 		p->addStar();
 		getStudentWorld()->playSound(SOUND_GIVE_STAR);
+		unactivate();
 	}
 
 }
@@ -219,12 +247,38 @@ void DirectionSquare::doSomething() {
 		return;
 	Player* p = getActorToActivateOn();
 	// If activated by a player
-	if (p != nullptr) {
+	if (p != nullptr) {  // Doesn't need to land
 		p->setWalkDirection(getDirection());
+		unactivate();
 	}
 }
 
+void BankSquare::doSomething() {
+	if (!isAlive())
+		return;
+	Player* p = getActorToActivateOn();
+	// If activated by a player
+	if (p != nullptr) {
 
+		if (didPlayerLand()) {
+			// Empty bank and add coins to player
+			p->setCoins(p->getCoins() + getStudentWorld()->getBankCoins());
+			getStudentWorld()->resetBankCoins();
+			getStudentWorld()->playSound(SOUND_WITHDRAW_BANK);
+		}
+		// if player passed onto square (didn't land)
+		else {
+			// Deduct 5 coins, can't go into negative
+			int newCount = p->getCoins() - 5;
+			if (newCount < 0)
+				newCount = 0;
+			p->setCoins(newCount);
+			getStudentWorld()->depositBankCoins(newCount);
+			getStudentWorld()->playSound(SOUND_DEPOSIT_BANK);
+		}
+		unactivate();
+	}
+}
 
 
 void Bowser::doSomething() {

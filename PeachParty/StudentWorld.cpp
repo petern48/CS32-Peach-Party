@@ -80,7 +80,11 @@ int StudentWorld::init()
                     break;
                 case Board::event_square:
                 case Board::bank_square:
+                    a = new BankSquare(x, y, this);
+                    break;
                 case Board::star_square:
+                    a = new StarSquare(x, y, this);
+                    break;
                 case Board::bowser:
                     a = new Bowser(x * SPRITE_WIDTH, y * SPRITE_HEIGHT, this);
                     break;

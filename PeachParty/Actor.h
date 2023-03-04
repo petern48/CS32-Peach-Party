@@ -10,16 +10,15 @@ class StudentWorld;
 
 const bool WAITING = false; // Make class constants???
 const bool WALKING = true;
-const bool IMPACTABLE = true;
 const int GRANTCOINS = 3;
 const int DEDUCTCOINS = -3;
 const int COINSFORASTAR = 20;
 
 class Actor : public GraphObject {
 public:
-	Actor(int imageID, StudentWorld* sw, int startX, int startY, bool impactable = false, int depth = 0, int startDir = right)
+	Actor(int imageID, StudentWorld* sw, int startX, int startY, int depth = 0, int startDir = right)
 		:GraphObject(imageID, startX * SPRITE_WIDTH, startY * SPRITE_HEIGHT, startDir, depth),
-		m_impactable(impactable), m_studentWorld(sw) { }
+		m_studentWorld(sw), m_walkDirection(startDir) { }
 	virtual void doSomething() = 0;
 	//virtual ~Actor();
 
@@ -28,52 +27,56 @@ public:
 	StudentWorld* getStudentWorld() const { return m_studentWorld; }
 	virtual bool isSquare() const { return false; }
 	virtual bool isPlayer() const { return false; }
-	// virtual bool isImpactable() const { return m_impactable; }
+	virtual bool isImpactable() const { return false; }
+	
+
+	// Included here so both Baddies and Players can access them
+	int getWalkDirection() const { return m_walkDirection; }
+	void setWalkDirection(int dir);
+	
+	
 
 private:
 	StudentWorld* m_studentWorld;
-	bool m_impactable;
 	bool m_isAlive = true;
+	int m_walkDirection;
 };
 
+	/*
 // Moveable character
 class Character : public Actor {
 public:
 	Character(int imageID, StudentWorld* sw, int startX, int startY, bool impactable = false)
 		:Actor(imageID, sw, startX, startY, impactable) { }
+
 	int getWalkDirection() const { return m_walkDirection; }
 	void setWalkDirection(int walkDirection);
-	virtual void activate() = 0;
-
 	void setState(int state) { m_state = state; }
 	bool getState() const { return m_state; }
-
-protected:
 	int getTicksToMove() const { return m_ticks_to_move; }
 	void setTicksToMove(int ticks) { m_ticks_to_move = ticks; }
-	void turnPerpendicular();
-	std::vector<int> getLegalMoves();
 
 private:
-	bool m_state = WAITING; // Waiting to Roll or Paused for Baddies
-	int m_walkDirection = right; // Starting Walking direction is right
-	int m_ticks_to_move = 0;
+
 };
+	*/
+
+
 
 // Player
-class Player : public Character {
+class Player : public Actor {
 public:
 	Player(int imageID, StudentWorld *sw, int startX, int startY, int playerNum) 
-		:Character(imageID, sw, startX, startY), m_playerNum(playerNum) { } // Default depth of 0, default startDirection of right
+		:Actor(imageID, sw, startX, startY), m_playerNum(playerNum) { } // Default depth of 0, default startDirection of right
 
-	int getPlayerNum() const { return m_playerNum; }   // UNSURE!!!
+	int getPlayerNum() const { return m_playerNum; }
 	void addStar() { m_stars++; }
 	int getStars() const { return m_stars; }
 	void setCoins(int coins) { m_coins = coins; }
 	int getCoins() const { return m_coins; }
 
 	virtual bool isPlayer() const { return true; }
-	virtual void activate(); // Activates squares or baddies it encounters
+	void activate(); // Activates squares or baddies it encounters
 
 	int getRoll() const { return m_dieRoll; }
 	void setRoll(int roll) { m_dieRoll = roll; }
@@ -84,7 +87,12 @@ public:
 	void swapCoins();
 	void teleportToRandomSq();
 
+	/*
+	int getWalkDirection() const { return m_walkDirection; }
+	void setWalkDirection(int walkDirection);
+	*/
 	virtual void doSomething();
+	void turnPerpendicular();
 
 private:
 	int m_stars = 0;
@@ -92,6 +100,10 @@ private:
 	bool m_hasVortex = false;
 	int m_playerNum;
 	int m_dieRoll = 0;
+
+	bool m_state = WAITING; // Waiting to Roll
+	// int m_walkDirection = right; // Starting Walking direction is right
+	int m_ticks_to_move = 0;
 };
 
 class Peach : public Player {
@@ -106,12 +118,14 @@ public:
 		:Player(IID_YOSHI, sw, startX, startY, 2) { }
 };
 
+bool atAFork(Actor* a);
+void getLegalMoves(Actor* a, std::vector<int>& movesAllowed);
 
 
 class Activatable : public Actor {
 public:
-	Activatable(int imageID, StudentWorld* sw, int startX, int startY, bool impactable = false, int depth = 0, int startDir = right)
-		: Actor(imageID, sw, startX, startY, impactable, depth, startDir) { }
+	Activatable(int imageID, StudentWorld* sw, int startX, int startY, int depth = 0, int startDir = right)
+		: Actor(imageID, sw, startX, startY, depth, startDir) { }
 
 	virtual void doSomething() { } // TODO
 
@@ -129,8 +143,8 @@ private:
 
 class ActivateOnPlayer : public Activatable {
 public:
-	ActivateOnPlayer(int imageID, StudentWorld* sw, int startX, int startY, bool impactable = false, int depth = 0, int startDir = right)
-		: Activatable (imageID, sw, startX, startY, impactable, depth, startDir) { }
+	ActivateOnPlayer(int imageID, StudentWorld* sw, int startX, int startY, int depth = 0, int startDir = right)
+		: Activatable (imageID, sw, startX, startY, depth, startDir) { }
 
 	virtual Player* getActorToActivateOn() const { return m_playerToActivateOn; }
 	virtual void setActorToActivateOn(Player* p, bool landed) { m_playerToActivateOn = p; m_landed = landed; }
@@ -162,7 +176,7 @@ private:
 class Square : public ActivateOnPlayer {
 public:
 	Square(int imageID, StudentWorld* sw, int X, int Y)
-		:ActivateOnPlayer(imageID, sw, X, Y, false, 1) { }
+		:ActivateOnPlayer(imageID, sw, X, Y, 1) { }
 
 	virtual bool isSquare() const { return true; }
 
@@ -210,13 +224,21 @@ public:
 private:
 };
 
+class BankSquare : public Square {
+public:
+	BankSquare(int x, int y, StudentWorld* sw)
+		: Square(IID_BANK_SQUARE, sw, x, y) { }
+	virtual void doSomething();
+};
+
 // BADDIES
 class Baddie : public ActivateOnPlayer {
 public:
 	Baddie(int imageID, StudentWorld* sw, int startX, int startY)
-		: ActivateOnPlayer(imageID, sw, startX, startY, IMPACTABLE){ }
+		: ActivateOnPlayer(imageID, sw, startX, startY){ }
 
 	virtual void activate() { }
+	virtual bool isImpactable() const { return true; }
 
 	void impactBaddie();
 
