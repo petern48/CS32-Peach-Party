@@ -157,18 +157,6 @@ private:
 };
 
 
-class Vortex : public Activatable {
-public:
-	Vortex(StudentWorld *sw, int x, int y, int direction) 
-		: Activatable(IID_VORTEX, sw, x, y), m_firingDirection(direction) { }
-	virtual void doSomething();
-
-	int getFiringDirection() { return m_firingDirection; }
-
-private:
-	int m_firingDirection;
-};
-
 
 
 // SQUARES
@@ -242,8 +230,8 @@ public:
 // BADDIES
 class Baddie : public ActivateOnPlayer {
 public:
-	Baddie(int imageID, StudentWorld* sw, int startX, int startY)
-		: ActivateOnPlayer(imageID, sw, startX, startY){ }
+	Baddie(int imageID, StudentWorld* sw, int startX, int startY, int pauseCounter = 180)
+		: ActivateOnPlayer(imageID, sw, startX, startY), m_pauseCounter(pauseCounter) { }
 
 	virtual void activate() { }
 	virtual bool isImpactable() const { return true; }
@@ -251,7 +239,7 @@ public:
 	void impactBaddie();
 
 private:
-	int m_pauseCounter = 180;
+	int m_pauseCounter;
 };
 
 class Bowser : public Baddie {
@@ -269,6 +257,17 @@ public:
 };
 
 
-void vortexOverlapsWithABaddie();
+class Vortex : public Activatable {
+public:
+	Vortex(StudentWorld *sw, int x, int y, int direction) 
+		: Activatable(IID_VORTEX, sw, x, y), m_firingDirection(direction) { }
+	virtual void doSomething();
+
+	int getFiringDirection() const { return m_firingDirection; }
+	std::vector<Activatable*> overlapsWithABaddie() const;
+
+private:
+	int m_firingDirection;
+};
 
 #endif // ACTOR_H_

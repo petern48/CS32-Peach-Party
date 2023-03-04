@@ -6,6 +6,7 @@
 #include <string>
 
 #include <list>
+#include <vector>
 #include "Actor.h"
 
 // Students:  Add code to this file, StudentWorld.cpp, Actor.h, and Actor.cpp
@@ -24,15 +25,16 @@ public:
   void resetBankCoins() { m_bankMoney = 0; }
 
   bool isValidSquare(int x, int y);
-  Activatable* getSquareAt(int x, int y);
-  Activatable* getRandomSquare(); // TODO
+  Activatable* getSquareAt(int x, int y) const;
+  Activatable* getRandomSquare() const;
   
   Player* getOtherPlayer(Player* p) const; // UNSURE if works properly TODO
+  std::vector<Activatable*> getAllBaddies() const;
 
 
 private:
-	Player* getWinner();
-	std::string getStatsString();
+	Player* getWinner() const;
+	std::string getStatsString() const;
 
 	Board m_board;
 	std::list<Activatable*> m_actors;

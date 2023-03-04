@@ -180,22 +180,6 @@ void Player::turnPerpendicular() {
 }
 
 
-void Vortex::doSomething() {
-	if (!isAlive())
-		return;
-
-	// Move forward two pixels
-	moveAtAngle(getFiringDirection(), 2);
-
-	// If vortex leaves boundaries of screen, set inactive
-	if (getX() < 0 || getX() >= VIEW_WIDTH || getY() < 0 || getY() >= VIEW_WIDTH)
-		setDead();
-
-	// Check if overlap
-	// TODO
-
-}
-
 
 // SQUARES
 
@@ -306,6 +290,40 @@ void EventSquare::doSomething() {
 }
 
 
+void Vortex::doSomething() {
+	if (!isAlive())
+		return;
+
+	// Move forward two pixels
+	moveAtAngle(getFiringDirection(), 2);
+
+	// If vortex leaves boundaries of screen, set inactive
+	if (getX() < 0 || getX() >= VIEW_WIDTH || getY() < 0 || getY() >= VIEW_WIDTH) {
+		setDead();
+		return;
+	}
+
+	// Check if overlap
+	// TODO
+	vector<Activatable*> impactables = overlapsWithABaddie();
+	if (impactables.size() != 0) {
+
+
+		setDead();
+		getStudentWorld()->playSound(SOUND_HIT_BY_VORTEX);
+
+	}
+
+}
+
+vector<Activatable*> Vortex::overlapsWithABaddie() const {
+	vector<Activatable*> v = getStudentWorld()->getAllBaddies();
+	// TODO
+	// if (impactable)
+	return v;
+}
+
+
 void Bowser::doSomething() {
 	/*
 	if (getState() == WAITING) { // PAUSED
@@ -317,6 +335,8 @@ void Bowser::doSomething() {
 void Boo::doSomething() {
 	
 }
+
+
 
 void Player::swapInts(int& x, int& y) {
 	int temp = x;

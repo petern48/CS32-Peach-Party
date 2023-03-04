@@ -182,7 +182,7 @@ Player* StudentWorld::getOtherPlayer(Player* p) const {
 
 // HELPER FUNCTIONS
 
-Player* StudentWorld::getWinner() {
+Player* StudentWorld::getWinner() const {
     // Peach has more stars
     if (m_Peach->getStars() > m_Yoshi->getStars())
         return m_Peach;
@@ -220,7 +220,7 @@ bool StudentWorld::isValidSquare(int x, int y) {
     return true;
 }
 
-string StudentWorld::getStatsString() {
+string StudentWorld::getStatsString() const {
     ostringstream oss;
     oss << "P1 Roll: " << m_Peach->getRoll() << " Stars: " << m_Peach->getStars() << " $$: " << m_Peach->getCoins();
     if (m_Peach->hasVortex())
@@ -233,19 +233,19 @@ string StudentWorld::getStatsString() {
     return oss.str();
 }
 
-Activatable* StudentWorld::getSquareAt(int x, int y) {
-    list<Activatable*>::iterator it;
+Activatable* StudentWorld::getSquareAt(int x, int y) const {
+    list<Activatable*>::const_iterator it;
     for (it = m_actors.begin(); it != m_actors.end(); it++)
         if ((*it)->isSquare() && (*it)->getX() == x && (*it)->getY() == y)
             return (*it);
     return nullptr;
 }
 
-Activatable* StudentWorld::getRandomSquare() {
+Activatable* StudentWorld::getRandomSquare() const {
     int sizeOfContainer = m_actors.size();
     int randomInt = randInt(0, sizeOfContainer);
 
-    list<Activatable*>::iterator it = m_actors.begin();
+    list<Activatable*>::const_iterator it = m_actors.begin();
     Activatable* curr;
 
     // Iterate to the random object
@@ -262,4 +262,13 @@ Activatable* StudentWorld::getRandomSquare() {
             it = m_actors.begin();
     }
     return curr;
+}
+
+vector<Activatable*> StudentWorld::getAllBaddies() const {
+    vector<Activatable*> v;
+    list<Activatable*>::const_iterator it;
+    for (it = m_actors.begin(); it != m_actors.end(); it++) {
+
+    }
+    return v;
 }
