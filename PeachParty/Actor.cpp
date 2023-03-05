@@ -12,11 +12,9 @@ void Player::doSomething() {
 		// if Avatar has an invalid direction (due to being teleported)
 		if (getWalkDirection() == INVALIDDIRECTION) {
 			int newDirection, randomInt;
-			do {
-				vector<int> legalMoves = getLegalMoves();
-				randomInt = randInt(0, legalMoves.size() - 1);
-				newDirection = legalMoves[randomInt];
-			} while (newDirection != getDirectionCameFrom());
+			vector<int> legalMoves = getLegalMoves();
+			randomInt = randInt(0, legalMoves.size() - 1);
+			newDirection = legalMoves[randomInt];
 			setWalkDirection(newDirection); // Set new Walk and Sprite Direction
 		}
 		
@@ -33,9 +31,10 @@ void Player::doSomething() {
 			StudentWorld* sw = getStudentWorld();
 			int newX, newY;
 			getPositionInThisDirection(getWalkDirection(), SPRITE_HEIGHT, newX, newY);
-			Actor* a = new Vortex(sw, newX, newY, getWalkDirection());
+			Actor* a = new Vortex(sw, newX / SPRITE_WIDTH, newY / SPRITE_HEIGHT, getWalkDirection());
 			sw->addActor(a);
 			sw->playSound(SOUND_PLAYER_FIRE);
+			m_hasVortex = false;
 		}
 		// User didn't press a key or any other key
 		else {
@@ -306,7 +305,7 @@ void Vortex::doSomething() {
 		return;
 
 	// Move forward two pixels
-	moveAtAngle(getFiringDirection(), 2);
+	moveAtAngle(getDirection(), 2);
 
 	// If vortex leaves boundaries of screen, set inactive
 	if (getX() < 0 || getX() >= VIEW_WIDTH || getY() < 0 || getY() >= VIEW_WIDTH) {
@@ -328,9 +327,33 @@ void Vortex::doSomething() {
 
 vector<Actor*> Vortex::overlapsWithABaddie() const { // TODO
 	vector<Actor*> v = getStudentWorld()->getAllBaddies();
-	// if (impactable)
+	vector<Actor*>::iterator it;
+	int lowerXBound = getX(); 
+	int upperXBound = getX() + SPRITE_WIDTH - 1; // e.g pixels 0 to 15
+	int lowerYBound = getY();
+	int upperYBound = getY() + SPRITE_HEIGHT - 1;
+
+	// Remove the Baddies not overlapping
+	for (it = v.begin(); it != v.end(); it++) {
+		Actor* curr = *it;
+		// Check if not in bounds, remove from vector
+		if (*it != nullptr && ((!isInBounds(lowerXBound, upperXBound, curr->getX()) &&
+			!isInBounds(lowerXBound, upperXBound, curr->getX() + SPRITE_WIDTH - 1)) ||
+			(!isInBounds(lowerYBound, upperYBound, curr->getY()) &&
+				!isInBounds(lowerYBound, upperYBound, curr->getY() + SPRITE_WIDTH - 1)))) {
+			v.erase(it);
+			*it = nullptr;
+			it = v.begin(); // Possibly invalidated
+		}
+	}
 	return v;
-} // TODO
+}
+
+bool Vortex::isInBounds(int lowerBound, int upperBound, int target) const {
+	if (target < lowerBound || target > upperBound)
+		return false;
+	return true;
+}
 
 
 void Baddie::doSomething() {
@@ -369,14 +392,6 @@ void Baddie::doSomething() {
 	}
 }
 
-void Bowser::doSomething() {
-	/*
-	if (getState() == WAITING) { // PAUSED
-		
-	}
-	*/
-}
-
 void Boo::waitingAct() {
 	Player* p = getPlayerToActivateOn();
 
@@ -411,7 +426,7 @@ void Bowser::doneWalkingAct() {
 		Actor* sq = getStudentWorld()->getSquareAt(getX(), getY());
 		sq->setDead();
 		// Create Dropping Square
-		Actor* a = new DroppingSquare(getX(), getY(), getStudentWorld());
+		Actor* a = new DroppingSquare(getX() / SPRITE_WIDTH, getY() / SPRITE_HEIGHT, getStudentWorld());
 		getStudentWorld()->addActor(a);
 
 		getStudentWorld()->playSound(SOUND_DROPPING_SQUARE_CREATED);

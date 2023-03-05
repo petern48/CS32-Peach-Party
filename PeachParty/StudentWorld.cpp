@@ -131,13 +131,13 @@ int StudentWorld::move()
 
     list<Actor*>::iterator it;
     for (it = m_actors.begin(); it != m_actors.end(); it++) {
-        if ((*it)->isAlive())
+        if ((*it) != nullptr && (*it)->isAlive())
             (*it)->doSomething();
     }
 
     // Delete any actors that have become inactive/dead during this tick
     for (it = m_actors.begin(); it != m_actors.end(); it++) {
-        if (!(*it)->isAlive()) {
+        if ((*it) != nullptr && !(*it)->isAlive()) { // Short Circuit
             delete* it;
             (*it) = nullptr;
         }
@@ -154,15 +154,21 @@ int StudentWorld::move()
 // Function may run twice, so set nullptrs
 void StudentWorld::cleanUp()
 {
-    delete m_Peach;
-    m_Peach = nullptr;
-    delete m_Yoshi;
-    m_Yoshi = nullptr;
+    if (m_Peach != nullptr) {
+        delete m_Peach;
+        m_Peach = nullptr;
+    }
+    if (m_Yoshi != nullptr) {
+        delete m_Yoshi;
+        m_Yoshi = nullptr;
+    }
     // Delete other objects
     list<Actor*>::iterator it;
     for (it = m_actors.begin(); it != m_actors.end(); it++) {
-        delete (*it);
-        (*it) = nullptr;
+        if ((*it) != nullptr) {
+            delete (*it);
+            (*it) = nullptr;
+        }
     }
 }
 
@@ -235,7 +241,7 @@ string StudentWorld::getStatsString() const {
 Actor* StudentWorld::getSquareAt(int x, int y) const {
     list<Actor*>::const_iterator it;
     for (it = m_actors.begin(); it != m_actors.end(); it++)
-        if ((*it)->isSquare() && (*it)->getX() == x && (*it)->getY() == y)
+        if ((*it) != nullptr && (*it)->isSquare() && (*it)->getX() == x && (*it)->getY() == y)
             return (*it);
     return nullptr;
 }
@@ -245,29 +251,27 @@ Actor* StudentWorld::getRandomSquare() const {
     int randomInt = randInt(0, sizeOfContainer);
 
     list<Actor*>::const_iterator it = m_actors.begin();
-    Actor* curr;
 
     // Iterate to the random object
     for (int i = 0; i < randomInt; i++)
         it++;
     // Iterate forward until find a square
     while (true) {
-        curr = *it;
-        if (curr->isSquare()) // Found a square
+        if ((*it) != nullptr && (*it)->isSquare()) // Found a square
             break;
         it++;
         // Loop around if needed
         if (it == m_actors.end())
             it = m_actors.begin();
     }
-    return curr;
+    return *it;
 }
 
 vector<Actor*> StudentWorld::getAllBaddies() const {
     vector<Actor*> v;
     list<Actor*>::const_iterator it;
     for (it = m_actors.begin(); it != m_actors.end(); it++)
-        if ((*it)->isBaddie())
+        if ((*it) != nullptr && (*it)->isBaddie())
             v.push_back((*it));
     return v;
 }

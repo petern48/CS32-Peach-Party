@@ -215,12 +215,12 @@ public:
 	virtual bool isBaddie() const { return true; }
 	void decreasePauseCounter() { m_pauseCounter--; }
 	int getPauseCounter() const { return m_pauseCounter; }
-	virtual void waitingAct() = 0;
+	virtual void hitByVortex();
 	virtual void doneWalkingAct();
 
-	virtual void hitByVortex();
 
 private:
+	virtual void waitingAct() = 0;
 	void setRandomLegalDirection();
 
 	int m_pauseCounter;
@@ -232,7 +232,8 @@ class Bowser : public Baddie {
 public:
 	Bowser(int startX, int startY, StudentWorld* sw)
 	: Baddie(IID_BOWSER, sw, startX, startY, 10) { }
-	virtual void doSomething();
+
+private:
 	virtual void waitingAct();
 	virtual void doneWalkingAct();
 };
@@ -241,6 +242,7 @@ class Boo : public Baddie {
 public:
 	Boo(int startX, int startY, StudentWorld* sw)
 		: Baddie(IID_BOO, sw, startX, startY, 3) { }
+private:
 	virtual void waitingAct();
 };
 
@@ -248,14 +250,13 @@ public:
 class Vortex : public Actor {
 public:
 	Vortex(StudentWorld *sw, int x, int y, int direction) 
-		: Actor(IID_VORTEX, sw, x, y), m_firingDirection(direction) { }
+		: Actor(IID_VORTEX, sw, x, y) { 
+		setDirection(direction);
+	}
 	virtual void doSomething();
-
-	int getFiringDirection() const { return m_firingDirection; }
-	std::vector<Actor*> overlapsWithABaddie() const;
-
 private:
-	int m_firingDirection;
+	std::vector<Actor*> overlapsWithABaddie() const;
+	bool isInBounds(int lowerBound, int upperBound, int target) const;
 };
 
 #endif // ACTOR_H_
