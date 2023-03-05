@@ -334,17 +334,18 @@ vector<Actor*> Vortex::overlapsWithABaddie() const { // TODO
 	int upperYBound = getY() + SPRITE_HEIGHT - 1;
 
 	// Remove the Baddies not overlapping
-	for (it = v.begin(); it != v.end(); it++) {
+	for (it = v.begin(); it != v.end();) {
 		Actor* curr = *it;
 		// Check if not in bounds, remove from vector
-		if (*it != nullptr && ((!isInBounds(lowerXBound, upperXBound, curr->getX()) &&
+		if (curr != nullptr && ((!isInBounds(lowerXBound, upperXBound, curr->getX()) &&
 			!isInBounds(lowerXBound, upperXBound, curr->getX() + SPRITE_WIDTH - 1)) ||
 			(!isInBounds(lowerYBound, upperYBound, curr->getY()) &&
 				!isInBounds(lowerYBound, upperYBound, curr->getY() + SPRITE_WIDTH - 1)))) {
-			v.erase(it);
-			*it = nullptr;
-			it = v.begin(); // Possibly invalidated
+
+			it = v.erase(it); // Erase old and save the new it
 		}
+		else
+			it++;
 	}
 	return v;
 }

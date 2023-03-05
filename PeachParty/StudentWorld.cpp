@@ -130,17 +130,22 @@ int StudentWorld::move()
     m_Yoshi->doSomething();
 
     list<Actor*>::iterator it;
-    for (it = m_actors.begin(); it != m_actors.end(); it++) {
+    for (it = m_actors.begin(); it != m_actors.end(); it++)
         if ((*it) != nullptr && (*it)->isAlive())
             (*it)->doSomething();
-    }
 
+
+    list<Actor*>::iterator temp;
     // Delete any actors that have become inactive/dead during this tick
-    for (it = m_actors.begin(); it != m_actors.end(); it++) {
+    for (it = m_actors.begin(); it != m_actors.end();) {
         if ((*it) != nullptr && !(*it)->isAlive()) { // Short Circuit
-            delete* it;
-            (*it) = nullptr;
+            temp = it;
+            it++;
+            delete* temp;
+            m_actors.erase(temp);
         }
+        else
+            it++;
     }
 
     // Update the status text on top of the screen
@@ -164,10 +169,13 @@ void StudentWorld::cleanUp()
     }
     // Delete other objects
     list<Actor*>::iterator it;
-    for (it = m_actors.begin(); it != m_actors.end(); it++) {
+    list<Actor*>::iterator temp;
+    for (it = m_actors.begin(); it != m_actors.end();) {
         if ((*it) != nullptr) {
-            delete (*it);
-            (*it) = nullptr;
+            temp = it;
+            it++;
+            delete *temp;
+            m_actors.erase(temp); // Erase pointer
         }
     }
 }
