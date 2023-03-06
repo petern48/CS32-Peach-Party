@@ -57,7 +57,6 @@ void Player::doSomething() {
 				if (atAFork()) {
 					int action = getStudentWorld()->getAction(getPlayerNum());
 					int newDir;
-					int directionIndicated = true;
 					// if user pressed a key
 					switch (action) {
 					case ACTION_DOWN:
