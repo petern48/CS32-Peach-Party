@@ -193,7 +193,12 @@ Player* StudentWorld::getOtherPlayer(Player* p) const {
         return m_Peach;
 }
 
-// HELPER FUNCTIONS
+vector<Player*> StudentWorld::getAllPlayers() const {
+    vector<Player*> v;
+    v.push_back(m_Peach);
+    v.push_back(m_Yoshi);
+    return v;
+}
 
 Player* StudentWorld::getWinner() const {
     // Peach has more stars

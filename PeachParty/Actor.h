@@ -35,7 +35,8 @@ public:
 	virtual bool isBaddie() const { return false; }
 
 	virtual void hitByVortex() { }
-	bool didCharacterLand() { return m_landed; }
+	bool didCharacterLand() const { return m_landed; }
+	void resetLandingStatus() { m_landed = false; }
 	void setActorToActivateOn(Character* p, bool landed);
 	Character* getActorToActivateOn() const { return m_characterToActivateOn; }
 	void unactivate();
@@ -72,8 +73,8 @@ public:
 	int getDirectionCameFrom() const;
 	bool squareInFrontExists() const;
 	bool isOnASquare() const;
-	bool atAFork();
-	std::vector<int> getLegalMoves();
+	bool atAFork() const;
+	std::vector<int> getLegalMoves() const;
 
 private:
 
@@ -217,10 +218,10 @@ public:
 	int getPauseCounter() const { return m_pauseCounter; }
 	virtual void hitByVortex();
 	virtual void doneWalkingAct();
+	virtual void waitingAct();
 
 
 private:
-	virtual void waitingAct() = 0;
 	void setRandomLegalDirection();
 
 	int m_pauseCounter;

@@ -29,8 +29,9 @@ public:
   Actor* getSquareAt(int x, int y) const;
   Actor* getRandomSquare() const;
   
-  Player* getOtherPlayer(Player* p) const; // UNSURE if works properly TODO
+  Player* getOtherPlayer(Player* p) const;
   std::vector<Actor*> getAllBaddies() const;
+  std::vector<Player*> getAllPlayers() const;
 
 
 private:

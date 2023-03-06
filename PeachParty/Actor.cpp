@@ -48,7 +48,8 @@ void Player::doSomething() {
 
 			Actor* sq = getStudentWorld()->getSquareAt(getX(), getY());
 
-			// If directly on direction Square TODO  (below during activate)
+			// If directly on direction Square  (below during activate)
+			
 			// If not on direction square
 			if (!sq->isDirectionSquare()) {
 
@@ -111,19 +112,21 @@ void Player::activate() {
 	if (square != nullptr)
 		square->setActorToActivateOn(this, landed);
 
-	// TODO Activate Baddies
-
+	// Activate Baddies if baddies is on same square as player
+	for (size_t i = 0; i < baddies.size(); i++)
+		if (baddies[i] != nullptr && baddies[i]->getX() == getX() && baddies[i]->getY() == getY())
+			baddies[i]->setActorToActivateOn(this, landed);
 }
 
 
 
-bool Character::atAFork() {
+bool Character::atAFork() const {
 	vector<int> validDir = getLegalMoves();
 	// If can move at least three directions, return true, else false
 	return validDir.size() >= 3 ? true : false; // Must have 3 legal directions (2 would just be a turn)
 }
 
-vector<int> Character::getLegalMoves() {
+vector<int> Character::getLegalMoves() const {
 	int nextX, nextY;
 	int direction = 0;
 	vector<int> movesAllowed;
@@ -298,6 +301,7 @@ void DroppingSquare::doSomething() {
 
 		getStudentWorld()->playSound(SOUND_DROPPING_SQUARE_ACTIVATE);
 	}
+	unactivate();
 }
 
 void Vortex::doSomething() {
@@ -325,7 +329,7 @@ void Vortex::doSomething() {
 
 }
 
-vector<Actor*> Vortex::overlapsWithABaddie() const { // TODO
+vector<Actor*> Vortex::overlapsWithABaddie() const {
 	vector<Actor*> v = getStudentWorld()->getAllBaddies();
 	vector<Actor*>::iterator it;
 	int lowerXBound = getX(); 
@@ -375,14 +379,12 @@ void Baddie::doSomething() {
 	}
 	// if in WALKING state
 	else {
-
-		if (atAFork()) {
+		if (atAFork())
 			setRandomLegalDirection();
-		}
+
 		// If Baddie on a square, but no square in front of it
-		else if (isOnASquare() && !squareInFrontExists()) {
+		else if (isOnASquare() && !squareInFrontExists())
 			turnPerpendicular();
-		}
 
 		moveAtAngle(getWalkDirection(), 2);
 
@@ -393,11 +395,20 @@ void Baddie::doSomething() {
 	}
 }
 
+void Baddie::waitingAct() {
+	vector<Player*> players = getStudentWorld()->getAllPlayers();
+	for (int i = 0; i < 2; i++) {
+		if (players[i]->getX() == getX() && players[i]->getY() == getY() && players[i]->getState() == WAITING)
+			setActorToActivateOn(players[i], true);
+	}
+}
+
 void Boo::waitingAct() {
+	Baddie::waitingAct();
 	Player* p = getPlayerToActivateOn();
 
 	// Choose either to swap coins or stars
-	if (p != nullptr) {
+	if (p != nullptr && didCharacterLand()) {
 		int n = randInt(0, 1);
 		if (n == 1)
 			p->swapCoins();
@@ -405,15 +416,26 @@ void Boo::waitingAct() {
 			p->swapStars();
 		getStudentWorld()->playSound(SOUND_BOO_ACTIVATE);
 	}
+	unactivate();
+}
+
+void Bowser::waitingAct() {
+	Baddie::waitingAct();
+	Player* p = getPlayerToActivateOn();
+	if (p != nullptr && didCharacterLand()) {
+		int rand = randInt(1, 2); // 50 percent chance
+		if (rand == 1) {
+			p->setCoins(0);
+			p->setStars(0);
+			getStudentWorld()->playSound(SOUND_BOWSER_ACTIVATE);
+		}
+	}
+	unactivate();
 }
 
 void Baddie::doneWalkingAct() {
 	setState(WAITING);
 	m_pauseCounter = 180;
-}
-
-void Bowser::waitingAct() {
-
 }
 
 void Bowser::doneWalkingAct() {
