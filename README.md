@@ -1,16 +1,15 @@
 # CS-32-Peach-Party
 
 This class project was focused on implementing polymorphism, inheritance, and data structures to create a mini game modeled off of Nintendo's Mario Party.
-Given a project skeleton, I implemented the Actor.h, Actor.cpp, StudentWorld.h, and StudentWorld.cpp files.
+Given a project skeleton, I implemented the following files: `Actor.h`, `Actor.cpp`, `StudentWorld.h`, and `StudentWorld.cpp`.
 <br/>
 
 ### The Game
 
-Peach Party is a two-player game that resembles a traditional board game.
-The players must direct their avatars, Peach and Yoshi, along the squares on the game
+Peach Party is a two-player game that resembles a traditional board game. The players must direct their avatars, Peach and Yoshi, along the squares on the game
 board collecting coins and stars, while trying to avoid baddies like Bowser and Boo who cause all sorts of trouble.
  
-When the game starts, the players may choose what board they want to play by pressing a key from 1 to 9
+When the game starts, the players may choose what board they want to play by pressing a key from 1 to 9.
 
 Players roll a (virtual) 10-sided die to decide how far they can move along the board during their next turn. After hitting a key to roll the die, the player that rolled then travels along the board's squares in their current direction until they've moved the appropriate number of squares, at which time they "land" on a square.
 
